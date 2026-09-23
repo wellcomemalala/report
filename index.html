@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>รายงานเชิงลึก — ร้านอาหาร</title>
+<style>
+:root{
+  --bg:#f7f7f5; --card:#fff; --border:#e6e4e0; --text:#1f1f1e; --text2:#6b6b68;
+  --blue:#2f6fd0; --green:#2e9e63; --orange:#d9822b; --red:#d64545; --purple:#7b5ea7;
+  --track:#eceae6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Thai","Sarabun",Arial,sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 64px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{font-size:26px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--text2);font-size:13px;margin-top:4px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input[type=date],input[type=text],input[type=number]{font:inherit;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+button{font:inherit;border-radius:8px;border:1px solid var(--border);background:#fff;padding:8px 14px;cursor:pointer;color:var(--text)}
+button:hover{background:#faf9f7}
+button.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+button.pri:hover{background:#265bad}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin:20px 0 22px}
+.tab{padding:9px 14px;border:0;background:none;color:var(--text2);border-bottom:2px solid transparent;border-radius:0;font-weight:500}
+.tab:hover{background:none;color:var(--text)}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+.card h2{font-size:17px;margin:0 0 4px;font-weight:700}
+.card .hint{color:var(--text2);font-size:12.5px;margin:0 0 16px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+@media(max-width:560px){.g4{grid-template-columns:1fr}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kpi .l{color:var(--text2);font-size:12.5px}
+.kpi .v{font-size:25px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
+.kpi .d{font-size:12px;color:var(--text2);margin-top:4px}
+.up{color:var(--green)} .down{color:var(--red)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font-size:12px;color:var(--text2);font-weight:600;background:#faf9f7;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tw{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.bar{height:7px;border-radius:99px;background:var(--track);min-width:110px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--blue)}
+.bar.warn i{background:var(--red)} .bar.mid i{background:var(--orange)}
+.tag{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid transparent;white-space:nowrap}
+.t-star{background:#e8f6ee;color:#1d7a49;border-color:#cbeadb}
+.t-plow{background:#e9f1fc;color:#25579f;border-color:#d2e2f7}
+.t-puzz{background:#fdf1e3;color:#9a5d17;border-color:#f6e1c6}
+.t-dog{background:#fdeceb;color:#a33230;border-color:#f7d6d4}
+.t-info{background:#f2f1ee;color:var(--text2);border-color:#e6e4e0}
+.note{border-left:3px solid var(--blue);background:#f8fafd;padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#33465e;margin:14px 0 0}
+.note.warn{border-left-color:var(--orange);background:#fdf8f1;color:#7a5418}
+.empty{color:var(--text2);text-align:center;padding:26px 10px;font-size:13px}
+.matrix{position:relative;width:100%;height:380px;border-left:1px solid var(--border);border-bottom:1px solid var(--border)}
+.matrix .q{position:absolute;font-size:12px;color:var(--text2);padding:6px 8px}
+.matrix .pt{position:absolute;transform:translate(-50%,50%);width:11px;height:11px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.matrix .lbl{position:absolute;transform:translate(-50%,50%);font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none}
+.axis{display:flex;justify-content:space-between;color:var(--text2);font-size:12px;margin-top:6px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--text2);align-items:center}
+.heat{overflow-x:auto}
+.heat table{min-width:620px}
+.heat td.c{text-align:center;font-size:11.5px;padding:7px 4px;border-radius:6px;font-variant-numeric:tabular-nums}
+.dl{margin:0}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:8px 18px;font-size:13.5px}
+@media(max-width:620px){.kv{grid-template-columns:1fr;gap:2px 0}.kv b{margin-top:10px}}
+.kv b{font-weight:600}
+.kv span{color:var(--text2)}
+.g h3{font-size:15px;margin:26px 0 8px;font-weight:700}
+.g h4{font-size:13.5px;margin:18px 0 6px;font-weight:600}
+.g p,.g li{font-size:13.5px;color:#33332f}
+.g ul,.g ol{padding-left:22px;margin:6px 0}
+.g li{margin:5px 0}
+code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
+#loader{padding:60px 0;text-align:center;color:var(--text2)}
+.ins{border:1px solid #e6e3dd;border-radius:12px;padding:16px 18px;margin-bottom:12px;background:#fff;border-left-width:5px}
+.ins h4{margin:0 0 6px;font-size:16px;line-height:1.45}
+.ins .ev{font-size:13.5px;color:#5c574e;line-height:1.7;margin:6px 0 10px}
+.ins .ev b{color:#1f1f1e}
+.ins .act{font-size:13.5px;line-height:1.7;background:#faf9f7;border-radius:8px;padding:10px 12px}
+.ins .act b{color:#1f1f1e}
+.ins-crit{border-left-color:#d93636}
+.ins-warn{border-left-color:#e8912d}
+.ins-good{border-left-color:#2e9e5b}
+.ins-info{border-left-color:#2f6fd0}
+.sev{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;margin-right:8px;vertical-align:2px}
+.sev-crit{background:#fdeaea;color:#b32424}
+.sev-warn{background:#fdf2e3;color:#a8650f}
+.sev-good{background:#e8f6ed;color:#1e7742}
+.sev-info{background:#e9f0fb;color:#24549e}
+.exec{background:linear-gradient(135deg,#1f2d3d,#31465f);color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:18px}
+.exec h2{color:#fff;margin:0 0 10px;font-size:19px}
+.exec p{margin:0;font-size:14.5px;line-height:1.85;opacity:.94}
+.exec .big{font-size:26px;font-weight:700;letter-spacing:-.4px}
+.pb h3{margin:26px 0 8px;font-size:17px;border-top:1px solid #eeebe5;padding-top:18px}
+.pb h4{margin:16px 0 6px;font-size:14.5px;color:#31465f}
+.pb p,.pb li{font-size:14px;line-height:1.85}
+.pb .play{border:1px solid #e6e3dd;border-radius:10px;padding:14px 16px;margin:10px 0;background:#fdfcfa}
+.pb .play b.h{display:block;font-size:14.5px;margin-bottom:4px;color:#1f1f1e}
+.bm{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+.bm th,.bm td{border:1px solid #eeebe5;padding:9px 11px;text-align:left}
+.bm th{background:#faf9f7;font-weight:600}
+.hidden{display:none}
+.costin{width:96px;text-align:right;padding:6px 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>รายงานเชิงลึก</h1>
+      <div class="sub" id="metaLine">กำลังโหลด…</div>
+    </div>
+    <div class="controls">
+      <select id="rangeSel">
+        <option value="7">7 วันล่าสุด</option>
+        <option value="30" selected>30 วันล่าสุด</option>
+        <option value="90">90 วันล่าสุด</option>
+        <option value="custom">เลือกช่วงเอง</option>
+      </select>
+      <input type="date" id="dFrom" class="hidden" />
+      <input type="date" id="dTo" class="hidden" />
+      <button class="pri" id="reloadBtn">โหลดข้อมูล</button>
+      <button id="csvBtn">ดาวน์โหลด CSV</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="overview">ภาพรวม</button>
+    <button class="tab" data-p="insight">💡 สิ่งที่ต้องลงมือ</button>
+    <button class="tab" data-p="menu">เมนู &amp; กำไร</button>
+    <button class="tab" data-p="kitchen">ครัว</button>
+    <button class="tab" data-p="channel">ช่องทาง &amp; โต๊ะ</button>
+    <button class="tab" data-p="basket">ตะกร้า &amp; คำขอพิเศษ</button>
+    <button class="tab" data-p="finance">💵 การเงิน (P&amp;L)</button>
+    <button class="tab" data-p="pos">🧾 เครื่องเก็บเงิน (เงินจริง)</button>
+    <button class="tab" data-p="recon">🔍 กระทบยอด</button>
+    <button class="tab" data-p="cost">ตั้งต้นทุน</button>
+    <button class="tab" data-p="playbook">📈 แผนการตลาด</button>
+    <button class="tab" data-p="voids">🚫 บิลที่ยกเลิก</button>
+    <button class="tab" data-p="market">🛒 วัตถุดิบ (เดินตลาด)</button>
+    <button class="tab" data-p="guide">คู่มือใช้งาน</button>
+  </div>
+
+  <div id="dataNote"></div>
+  <div id="loader">กำลังโหลดข้อมูลจาก Firebase…</div>
+
+  <!-- สิ่งที่ต้องลงมือ -->
+  <div class="panel hidden" id="p-insight">
+    <div id="execSummary"></div>
+    <div class="card">
+      <h2>ข้อค้นพบจากข้อมูลจริง</h2>
+      <p class="hint">ระบบวิเคราะห์ข้อมูลในช่วงที่เลือกด้วยเกณฑ์มาตรฐานธุรกิจร้านอาหาร แล้วเรียงตามความเร่งด่วน · อัปเดตทุกครั้งที่โหลดข้อมูล</p>
+      <div id="insightList"></div>
+    </div>
+  </div>
+
+  <!-- ภาพรวม -->
+  <div class="panel" id="p-overview">
+    <div class="grid g4" id="kpis"></div>
+    <div class="card" style="margin-top:18px">
+      <h2>แนวโน้มยอดขายรายวัน</h2>
+      <p class="hint">เส้นทึบ = ยอดขายรายวัน · เส้นประ = ค่าเฉลี่ยเคลื่อนที่ 7 วัน (ใช้ดูทิศทางจริง ไม่หลงตามวันเด้ง)</p>
+      <div id="trendSvg"></div>
+    </div>
+    <div class="card">
+      <h2>ช่วงเวลาขายดี</h2>
+      <p class="hint">แถว = ชั่วโมง · คอลัมน์ = วันในสัปดาห์ · ตัวเลข = จำนวนจาน · ยิ่งเข้มยิ่งขายดี</p>
+      <div class="heat" id="heat"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2>ยอดตามวันในสัปดาห์</h2>
+        <p class="hint">ใช้จัดกะพนักงานและวางโปรวันเงียบ</p>
+        <div id="dowTable"></div>
+      </div>
+      <div class="card">
+        <h2>ยอดตามช่วงมื้อ</h2>
+        <p class="hint">กลางวัน 10:00–15:00 · บ่าย 15:00–17:00 · เย็น 17:00–21:00 · ดึก 21:00+</p>
+        <div id="daypartTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- เมนู -->
+  <div class="panel hidden" id="p-menu">
+    <div class="card">
+      <h2>Menu Engineering</h2>
+      <p class="hint">แกนนอน = ความนิยม (จำนวนจาน) · แกนตั้ง = กำไรต่อจาน (ถ้ายังไม่กรอกต้นทุน จะใช้ราคาขายแทน) · เส้นตัด = ค่าเฉลี่ยของร้าน</p>
+      <div class="matrix" id="matrix"></div>
+      <div class="axis"><span>ขายน้อย</span><span>ขายเยอะ →</span></div>
+      <div class="legend">
+        <span><span class="tag t-star">ดาว</span> ขายดี + กำไรดี → ดันต่อ</span>
+        <span><span class="tag t-plow">ม้างาน</span> ขายดี + กำไรน้อย → ขึ้นราคา/ลดต้นทุน</span>
+        <span><span class="tag t-puzz">ปริศนา</span> ขายน้อย + กำไรดี → โปรโมต</span>
+        <span><span class="tag t-dog">สุนัข</span> ขายน้อย + กำไรน้อย → ตัดออก</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>อันดับเมนู (Pareto 80/20)</h2>
+      <p class="hint">เมนูที่รวมกันได้ 80% ของยอดขาย คือเมนูที่ต้องไม่ให้ขาดและไม่ให้คุณภาพตก</p>
+      <div id="paretoTable"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2>เมนูที่ไม่ขยับ</h2>
+        <p class="hint">ขายได้น้อยมากหรือไม่ได้ขายเลยในช่วงที่เลือก</p>
+        <div id="deadTable"></div>
+      </div>
+      <div class="card">
+        <h2>ราคายังไม่ได้ตั้ง</h2>
+        <p class="hint">เมนูพวกนี้ทำให้ยอดเงินในรายงานต่ำกว่าความจริง</p>
+        <div id="noPriceTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ครัว -->
+  <div class="panel hidden" id="p-kitchen">
+    <div class="grid g4" id="kitchenKpis"></div>
+    <div class="card" style="margin-top:18px">
+      <h2>เวลาทำอาหารต่อเมนู</h2>
+      <p class="hint">P90 คือ “ช้าสุดที่ลูกค้า 9 ใน 10 คนเจอ” ใช้ตัวนี้ตั้งคำมั่นเวลาเสิร์ฟ ดีกว่าค่าเฉลี่ย</p>
+      <div id="prepTable"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2>เวลาทำอาหารตามช่วงเวลา</h2>
+        <p class="hint">ชั่วโมงที่ช้าขึ้นชัดเจน = ครัวเป็นคอขวด</p>
+        <div id="prepByHour"></div>
+      </div>
+      <div class="card">
+        <h2>ภาระงานตามเชฟ</h2>
+        <p class="hint">แบ่งตามคำในชื่อเมนู (ตั้งค่าในหน้าจัดการเมนู)</p>
+        <div id="chefTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ช่องทาง -->
+  <div class="panel hidden" id="p-channel">
+    <div class="card">
+      <h2>สัดส่วนช่องทางขาย</h2>
+      <p class="hint">เดลิเวอรีมีค่า GP 25–35% ดูยอด “หลังหักค่าคอม” ก่อนตัดสินใจอัดโปร</p>
+      <div id="channelTable"></div>
+      <div class="note" id="feeBox"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2>ผลงานตามโต๊ะ</h2>
+        <p class="hint">โต๊ะที่ยอดต่อบิลต่ำผิดปกติ มักเป็นโต๊ะที่พนักงานเชียร์ขายไม่ถึง</p>
+        <div id="tableTable"></div>
+      </div>
+      <div class="card">
+        <h2>ผลงานตามพนักงาน</h2>
+        <p class="hint">ยอดต่อบิล = ความสามารถเชียร์ขาย (upsell)</p>
+        <div id="staffTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ตะกร้า -->
+  <div class="panel hidden" id="p-basket">
+    <div class="card">
+      <h2>เมนูที่มักสั่งคู่กัน</h2>
+      <p class="hint">ใช้ออกแบบเซ็ตคู่/คอมโบ และให้พนักงานเชียร์ขายต่อ · Lift &gt; 1.5 = คู่ที่ไปด้วยกันจริง ไม่ใช่เพราะเมนูนั้นดังอยู่แล้ว</p>
+      <div id="pairTable"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2>ขนาดบิล</h2>
+        <p class="hint">การกระจายจำนวนจานต่อบิล</p>
+        <div id="basketDist"></div>
+      </div>
+      <div class="card">
+        <h2>คำขอพิเศษที่เจอบ่อย</h2>
+        <p class="hint">คำที่ซ้ำบ่อย = ควรทำเป็นตัวเลือกในเมนูเลย</p>
+        <div id="commentTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ต้นทุน -->
+  <div class="panel hidden" id="p-cost">
+    <div class="card">
+      <h2>ต้นทุนวัตถุดิบต่อจาน</h2>
+      <p class="hint">กรอกเท่าที่รู้ก่อนได้ เริ่มจากเมนูขายดี 20 อันดับแรกก็เห็นภาพแล้ว · บันทึกไว้ที่ <code>menuCost</code> ไม่กระทบข้อมูลเดิม</p>
+      <div class="grid g2" style="margin-bottom:14px">
+        <div>
+          <div class="l" style="color:var(--text2);font-size:12.5px;margin-bottom:6px">ค่าคอมเดลิเวอรี (%)</div>
+          <input type="number" id="gpInput" min="0" max="60" step="1" style="width:100%" />
+        </div>
+        <div style="display:flex;align-items:flex-end;color:var(--text2);font-size:12.5px">
+          <div>ใช้กับแกร็บ / ไลน์แมน / ช้อปปี้ เพื่อคำนวณยอดที่ได้รับจริง</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input type="text" id="costSearch" placeholder="ค้นหาเมนู" style="flex:1" />
+        <button class="pri" id="saveCostBtn">บันทึกต้นทุน</button>
+      </div>
+      <div id="costTable"></div>
+    </div>
+  </div>
+
+  <!-- คู่มือ -->
+  <style>
+  .fin-t{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+  .fin-t>div{flex:1 1 150px;border:1px solid #e2ded6;border-radius:10px;padding:10px 12px;background:#fff}
+  .fin-t .l{font-size:12px;color:#8a857c}
+  .fin-t .v{font-size:20px;font-weight:700;margin-top:2px}
+  .fin-t .s{font-size:11px;color:#8a857c;margin-top:2px}
+  .fin-pos{color:#0F6B5C}.fin-neg{color:#C1533A}
+  .fbar{height:8px;border-radius:6px;background:#efece6;overflow:hidden;margin-top:4px}
+  .fbar>i{display:block;height:100%}
+  .ftag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;font-weight:600}
+  table.bm td.r,table.bm th.r{text-align:right}
+  </style>
+
+  <!-- การเงิน -->
+  <div class="panel hidden" id="p-finance">
+    <div class="card">
+      <h2>งบกำไรขาดทุน และโครงสร้างต้นทุน</h2>
+      <p class="hint">ดึงจากระบบบัญชีร้าน (restaurant_pos_v1) ตามช่วงวันที่เลือกด้านบน · อ่านอย่างเดียว ไม่มีการแก้ไขข้อมูลบัญชี</p>
+      <div id="finBody"></div>
+    </div>
+  </div>
+
+  <!-- เครื่องเก็บเงิน -->
+  <div class="panel hidden" id="p-pos">
+    <div class="card">
+      <h2>ยอดเงินจริงจากเครื่องเก็บเงิน</h2>
+      <p class="hint">ดึงจากบิลที่ปิดแล้วในเครื่องเก็บเงิน (pos_cashier_v1) — นี่คือเงินที่เก็บได้จริง ไม่ใช่การประมาณจากออเดอร์</p>
+      <div id="posBody"></div>
+    </div>
+  </div>
+
+  <!-- กระทบยอด -->
+  <div class="panel hidden" id="p-recon">
+    <div class="card">
+      <h2>กระทบยอด ออเดอร์ × บัญชี</h2>
+      <p class="hint">เอาของสองระบบมชนกัน เพื่อหาเงินรั่ว ของเสีย และต้นทุนที่หายไปโดยไม่รู้ตัว</p>
+      <div id="reconBody"></div>
+    </div>
+  </div>
+
+  <!-- แผนการตลาด -->
+  <div class="panel hidden" id="p-playbook">
+    <div class="card pb" style="max-width:820px">
+      <h2>คู่มือวิเคราะห์และทำการตลาดร้านอาหาร</h2>
+      <p class="hint">มาตรฐานที่เชนร้านอาหารใช้จริง ปรับให้เข้ากับข้อมูลที่ระบบของคุณมีจริง — อ่านคู่กับแท็บ “สิ่งที่ต้องลงมือ”</p>
+
+      <h3>1. ตัวเลขมาตรฐานอุตสาหกรรม (Industry Benchmark)</h3>
+      <p>เอาตัวเลขร้านคุณมาเทียบช่องนี้ ถ้าหลุดกรอบคือสัญญาณที่ต้องแก้</p>
+      <table class="bm">
+        <tr><th>ตัวชี้วัด</th><th>เกณฑ์ดี</th><th>เตือน</th><th>แปลว่าอะไร</th></tr>
+        <tr><td>Food Cost %</td><td>28–35%</td><td>&gt; 40%</td><td>ต้นทุนวัตถุดิบเทียบยอดขาย — เกินแปลว่าตักเยอะ/ของเสีย/ของขึ้นราคา</td></tr>
+        <tr><td>Prime Cost %<br><span class="hint">(วัตถุดิบ + ค่าแรง)</span></td><td>55–65%</td><td>&gt; 70%</td><td>ตัวเลขชี้เป็นตายที่สุดของร้านอาหาร — เกิน 70% แทบไม่เหลือกำไร</td></tr>
+        <tr><td>Gross Profit %</td><td>65–72%</td><td>&lt; 60%</td><td>กำไรขั้นต้นต่ำ ต้องขึ้นราคาหรือลดต้นทุน</td></tr>
+        <tr><td>จานต่อบิล</td><td>2.0–3.5</td><td>&lt; 1.8</td><td>พนักงานไม่ได้เชียร์ขายเพิ่ม หรือเมนูไม่มีของเคียง</td></tr>
+        <tr><td>เวลารอ P90</td><td>&lt; 15 นาที</td><td>&gt; 25 นาที</td><td>ลูกค้าเริ่มหงุดหงิด รีวิวเสีย คนไม่กลับมา</td></tr>
+        <tr><td>สัดส่วนเดลิเวอรี</td><td>15–30%</td><td>&gt; 40%</td><td>ค่าคอม 30–35% กินกำไร — พึ่งแอปมากไปคือความเสี่ยง</td></tr>
+        <tr><td>เมนู Top 20%</td><td>ทำยอด 70–80%</td><td>ทำยอด &gt; 90%</td><td>พึ่งเมนูน้อยเกินไป เมนูที่เหลือคือต้นทุนจม</td></tr>
+        <tr><td>บิลที่สั่งเพียง 1 จาน</td><td>&lt; 25%</td><td>&gt; 40%</td><td>โอกาสเชียร์ขายที่เสียไปต่อหน้า</td></tr>
+      </table>
+
+      <h3>2. จังหวะการดูข้อมูล (Review Rhythm)</h3>
+      <p>เจ้าของร้านที่โตได้ ไม่ได้ดูรายงานทุกวัน แต่ดู <b>ตัวเลขที่ถูก ในจังหวะที่ถูก</b></p>
+      <table class="bm">
+        <tr><th>ความถี่</th><th>ดูอะไร</th><th>เวลา</th></tr>
+        <tr><td><b>ทุกวัน</b> (ปิดร้าน)</td><td>ยอดขาย · จำนวนบิล · เมนูที่ขายไม่ได้</td><td>3 นาที</td></tr>
+        <tr><td><b>ทุกสัปดาห์</b> (จันทร์เช้า)</td><td>แท็บ “สิ่งที่ต้องลงมือ” · AOV · จานต่อบิล · เวลารอ</td><td>15 นาที</td></tr>
+        <tr><td><b>ทุกเดือน</b></td><td>Menu Engineering · เมนูตาย · สัดส่วนช่องทาง · แนวโน้ม 3 เดือน</td><td>1 ชม.</td></tr>
+        <tr><td><b>ทุกไตรมาส</b></td><td>รื้อเมนูใหม่ · ทบทวนราคา · วางแผนคน</td><td>ครึ่งวัน</td></tr>
+      </table>
+
+      <h3>3. หลักคิด 5 ข้อที่ใช้ตัดสินใจ</h3>
+
+      <h4>① แยกก่อนว่า “คนน้อยลง” หรือ “คนจ่ายน้อยลง”</h4>
+      <p><b>ยอดขาย = จำนวนบิล × ยอดต่อบิล</b> เสมอ — ยอดตกต้องรู้ก่อนว่าตัวไหนตก</p>
+      <ul>
+        <li><b>บิลลด</b> → ปัญหาการตลาด คนไม่เข้าร้าน → แก้ด้วยโปร/ป้าย/รีวิว</li>
+        <li><b>AOV ลด</b> → ปัญหาหน้าร้าน พนักงานไม่เชียร์ → แก้ด้วยเซ็ต/เมนูแนะนำ/เทรนนิ่ง</li>
+        <li><b>ลดทั้งคู่</b> → สัญญาณอันตราย ต้องแก้คุณภาพอาหาร/บริการก่อนทำการตลาด</li>
+      </ul>
+
+      <h4>② Menu Engineering — เมนูแต่ละกลุ่มทำไม่เหมือนกัน</h4>
+      <div class="play"><b class="h">⭐ ดาว — ขายดี กำไรดี</b>
+        ห้ามลดคุณภาพ ห้ามของขาด วางตำแหน่งมุมขวาบนของเมนู ใส่รูปใหญ่สุด ขึ้นราคาได้ทีละ 5–10% ลูกค้าไม่หนี</div>
+      <div class="play"><b class="h">🐴 ม้าไถ — ขายดี กำไรน้อย</b>
+        ห้ามขึ้นราคาตรงๆ (ลูกค้าจำราคาได้) → ให้ลดต้นทุนแทน เช่น ปรับปริมาณ จัดชุดคู่กับเมนูกำไรสูง หรือเจรจาราคาวัตถุดิบใหม่</div>
+      <div class="play"><b class="h">🧩 ปริศนา — ขายน้อย กำไรดี</b>
+        ของดีแต่คนไม่รู้จัก → เปลี่ยนชื่อให้น่าสนใจ ย้ายไปหน้าแรกของเมนู ให้พนักงานเชียร์ ถ้า 30 วันยังไม่ขยับ → ตัดทิ้ง</div>
+      <div class="play"><b class="h">🗑️ สุนัข — ขายน้อย กำไรน้อย</b>
+        ตัดออกทันที — ทุกเมนูที่คงไว้มีต้นทุนแอบ (ของสดที่ต้องเตรียมรอ พื้นที่ตู้เย็น สมองแม่ครัว) <b>เมนูสั้นลง = ครัวเร็วขึ้น ลูกค้าสั่งง่ายขึ้น</b></div>
+
+      <h4>③ กฎ 80/20 (Pareto)</h4>
+      <p>เมนู 20% แรกมักทำยอดขาย 70–80% → <b>เวลาทำการตลาด โปรโมทเฉพาะ 20% นี้</b> อย่าเสียเงินกับเมนูที่ไม่มีใครสนใจ</p>
+
+      <h4>④ Capacity — ชั่วโมงที่ว่างคือเงินที่หายไป</h4>
+      <p>ค่าเช่า ค่าไฟ ค่าแรง เดินเท่ากันทุกชั่วโมง — ชั่วโมงที่ขายได้ 5 จาน กับชั่วโมงที่ขายได้ 80 จาน จ่ายต้นทุนคงที่เท่ากัน</p>
+
+      <h4>⑤ คำขอพิเศษ = เสียงของลูกค้าที่ฟรี</h4>
+      <p>ถ้า “เผ็ดน้อย” มาเกิน 15% ของเมนูหนึ่ง → เปิดขายเป็นเมนูแยกไปเลย คิดราคาเท่าเดิม แต่ได้ความชัดเจนและครัวทำง่ายขึ้น</p>
+
+      <h3>4. คลังแผนการตลาด — เจออะไรให้ทำอะไร</h3>
+
+      <div class="play"><b class="h">ปัญหา: ช่วงเวลาบ่ายคนหาย (Dead Hours)</b>
+        ทำ <b>เมนูช่วงเวลา</b> — ชุดอิ่มคุ้มราคาพิเศษ 14:00–16:00 หรือ “ชาไทย + ขนมทานตัดราคาพิเศษ” เพิ่มยอดโดยไม่ต้องเพิ่มคน เพราะค่าเช่าค่าแรงจ่ายอยู่แล้ว</div>
+
+      <div class="play"><b class="h">ปัญหา: วันธรรมดาขายไม่ดี</b>
+        ทำ <b>โปรเฉพาะวัน</b> — “วันอังคารลด 20%” หรือ เมนูพิเศษเฉพาะวันนั้น สร้างเหตุผลให้คนมาวันที่เงียบ</div>
+
+      <div class="play"><b class="h">ปัญหา: ยอดต่อบิลต่ำ / จานต่อบิลต่ำ</b>
+        ทำ <b>Upsell ที่หน้าโต๊ะ</b> — จัดเซ็ต (จานหลัก+เครื่องดื่ม) · ฝึกพนักงานพูดประโยคเดียว “รับของทานเล่นไหมคะ” · เมนูแนะนำติดท้ายบิล</div>
+
+      <div class="play"><b class="h">ปัญหา: เดลิเวอรีโตเร็วเกินไป</b>
+        ค่าคอม 30–35% ทำให้กำไรบางมาก → ทำ <b>ราคาสองชั้น</b> (เมนูแอปแพงกว่าหน้าร้าน 10–15%) และใส่การ์ดส่วนลดในกล่อง เพื่อดึงลูกค้ามาสั่งตรง</div>
+
+      <div class="play"><b class="h">ปัญหา: เมนูพึ่งพาตัวเดียวมากเกินไป</b>
+        ถ้าเมนูเดียวเกิน 25% ของยอด = <b>ความเสี่ยง</b> วัตถุดิบขาด/ขึ้นราคาเมื่อไหร่กระทบทันที → ปั้น “พระรอง” 2–3 ตัวขึ้นมา</div>
+
+      <div class="play"><b class="h">ปัญหา: ครัวช้าช่วงพีค</b>
+        ดูแท็บครัวว่าเมนูไหนทำนานสุด → <b>Prep ล่วงหน้า</b> (เตรียมชิ้นส่วนไว้ก่อนรอบพีค) · สลับตำแหน่งแม่ครัวช่วงพีค · หรือถ้าเมนูนั้นนานและกำไรน้อย ให้เลิกขายช่วงพีค</div>
+
+      <h3>5. ข้อควรระวังเชิงวิชาชีพ</h3>
+      <ul>
+        <li><b>อย่าตัดสินใจจากข้อมูลน้อยกว่า 30 วัน</b> — ช่วงสั้นเกินไปจะหลงตามอากาศ/วันหยุด</li>
+        <li><b>เทียบช่วงเวลาเดียวกันเสมอ</b> — เทียบเดือนนี้กับเดือนที่แล้วอย่างเดียวอาจหลอก ควรเทียบกับเดือนเดียวกันของปีก่อนด้วย</li>
+        <li><b>เมนูที่ขายดี ≠ เมนูที่ทำเงิน</b> — ดูกำไรรวม (กำไรต่อจาน × จำนวนจาน) ไม่ใช่ดูแค่ % กำไร</li>
+        <li><b>ระบบไม่เห็น “คนที่ไม่ได้สั่ง”</b> — คนเดินผ่านแล้วไม่เข้า หรือสั่งแล้วของหมด ไม่มีในข้อมูลนี้</li>
+        <li><b>วันที่บีบอัดแล้ว</b> เหลือแต่ยอดรวมรายวัน → วิเคราะห์รายชั่วโมง/รายโต๊ะของวันนั้นไม่ได้</li>
+      </ul>
+
+      <h3>6. เริ่มอย่างไร — แผน 30 วันแรก</h3>
+      <ol>
+        <li><b>สัปดาห์ 1:</b> เปิดแท็บ “สิ่งที่ต้องลงมือ” จดข้อสีแดงทั้งหมด — เลือกมาแก้ <b>1 ข้อเท่านั้น</b></li>
+        <li><b>สัปดาห์ 2:</b> ตัดเมนูกลุ่ม “สุนัข” ออก 3–5 ตัว แล้วดูว่ายอดขายรวมลดไหม (มักจะไม่ลด)</li>
+        <li><b>สัปดาห์ 3:</b> จัดโปรช่วงเวลาเงียบ 1 ตัว วัดผล 2 สัปดาห์</li>
+        <li><b>สัปดาห์ 4:</b> ขึ้นราคาเมนูกลุ่ม “ม้าไถ” 5–10% แล้วเฝ้าดูจำนวนจาน</li>
+      </ol>
+      <p class="hint">กฎเหล็ก: <b>แก้ทีละอย่าง</b> ถ้าเปลี่ยนหลายอย่างพร้อมกัน จะไม่รู้เลยว่าอะไรได้ผล</p>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="p-voids">
+    <div class="card">
+      <h2>🚫 บิลที่ถูกยกเลิก · แยกรายพนักงาน</h2>
+      <p class="hint">บิลที่กด "ยกเลิกบิล" บนเครื่องเก็บเงิน — ใช้เทียบว่าใครยกเลิกบ่อยผิดปกติ และยกเลิกบิลที่มูลค่าสูงหรือเปล่า<br>
+      ช่วงเวลาตามตัวเลือกด้านบนสุดของหน้า</p>
+      <div class="controls" style="margin-top:10px">
+        <button class="pri" id="vdReload">โหลดข้อมูล</button>
+        <button id="vdCsv">ดาวน์โหลด CSV</button>
+        <span class="hint" id="vdStatus"></span>
+      </div>
+    </div>
+    <div id="vdBody"></div>
+  </div>
+
+  <div class="panel hidden" id="p-market">
+    <div class="card">
+      <h2>🛒 วัตถุดิบ · จากระบบเดินตลาด</h2>
+      <p class="hint">ดูว่าของอะไรใช้เยอะ/น้อย ซื้อถี่แค่ไหน จากร้านไหน ใครสั่ง<br>
+      <b>ข้อจำกัด:</b> ระบบเดินตลาดยังไม่เก็บราคา หน้านี้จึงดูได้เฉพาะ "จำนวน" ยังคิดเป็นเงินหรือ Food Cost % ไม่ได้</p>
+      <div class="controls" style="margin-top:10px">
+        <select id="mkRange">
+          <option value="30">30 วันล่าสุด</option>
+          <option value="90" selected>90 วันล่าสุด</option>
+          <option value="180">180 วันล่าสุด</option>
+          <option value="99999">ทั้งหมด</option>
+        </select>
+        <button class="pri" id="mkReload">โหลดข้อมูล</button>
+        <button id="mkCsv">ดาวน์โหลด CSV</button>
+        <span class="hint" id="mkStatus"></span>
+      </div>
+    </div>
+    <div id="mkBody"></div>
+  </div>
+
+  <div class="panel hidden" id="p-guide">
+    <div class="card g" style="max-width:760px">
+      <h2>อ่านรายงานนี้ให้เป็น</h2>
+      <p class="hint">เขียนสำหรับเจ้าของร้าน ไม่ต้องมีพื้นฐานบัญชีหรือสถิติ</p>
+
+      <h3>1. ตัวเลขที่ต้องดูทุกสัปดาห์</h3>
+      <div class="kv">
+        <b>ยอดขาย</b><span>เงินเข้าทั้งหมด ดูคู่กับจำนวนบิลเสมอ — ยอดตกเพราะคนน้อยลง กับเพราะคนสั่งน้อยลง แก้ไม่เหมือนกัน</span>
+        <b>จำนวนบิล</b><span>จำนวนกลุ่มลูกค้า = ตัววัด “คนเข้าร้าน” แก้ด้วยการตลาด</span>
+        <b>ยอดต่อบิล (AOV)</b><span>ลูกค้า 1 กลุ่มจ่ายเท่าไหร่ = ตัววัด “การเชียร์ขาย” แก้ด้วยเมนูแนะนำ/เซ็ต/ของหวาน · ขึ้น 10% กำไรขึ้นเยอะกว่าเพิ่มลูกค้า 10% เพราะไม่มีต้นทุนหาลูกค้าใหม่</span>
+        <b>จานต่อบิล</b><span>ต่ำกว่า 2 = ลูกค้ามาคนเดียวหรือพนักงานไม่ได้เสนอเพิ่ม</span>
+        <b>กำไรขั้นต้น</b><span>ยอดขาย − ต้นทุนวัตถุดิบ ร้านอาหารทั่วไปควรอยู่ 65–70% (ต้นทุนอาหาร 30–35%)</span>
+        <b>เวลารอ P90</b><span>ช้าสุดที่ลูกค้า 9 ใน 10 คนเจอ เกิน 20 นาทีคือจุดที่ลูกค้าเริ่มบ่น</span>
+      </div>
+
+      <h3>2. หลักการวิเคราะห์ 4 ข้อที่ใช้ได้จริง</h3>
+      <h4>Menu Engineering (แท็บ “เมนู &amp; กำไร”)</h4>
+      <p>แบ่งเมนูเป็น 4 กลุ่มด้วยความนิยม × กำไรต่อจาน แล้วทำต่างกัน:</p>
+      <ul>
+        <li><b>ดาว</b> — ขายดี กำไรดี: อย่าแตะราคา อย่าให้ของขาด ใส่รูปใหญ่สุดในเมนู</li>
+        <li><b>ม้างาน</b> — ขายดี กำไรน้อย: ขึ้นราคาทีละ 5–10 บาท (คนซื้อประจำมักไม่หนี) หรือลดต้นทุน/ลดขนาดพอร์ชัน</li>
+        <li><b>ปริศนา</b> — ขายน้อย กำไรดี: ย้ายไปอยู่ตำแหน่งเด่นในเมนู ให้พนักงานเชียร์ ถ้า 1 เดือนยังไม่ขยับ = ตัด</li>
+        <li><b>สุนัข</b> — ขายน้อย กำไรน้อย: ตัดออก ทุกเมนูที่ตัดได้ = สต็อกน้อยลง ของเสียน้อยลง ครัวเร็วขึ้น</li>
+      </ul>
+      <h4>Pareto 80/20</h4>
+      <p>ปกติเมนู 20% ทำยอด 80% เมนูกลุ่มนี้ห้ามขาด ห้ามคุณภาพตก และคือกลุ่มที่ควรเอาไปทำคอนเทนต์/โปรโมต ไม่ใช่เมนูที่คุณชอบเอง</p>
+      <h4>ช่วงเวลา (Heatmap)</h4>
+      <p>ช่องเข้มคือเวลาที่เงินเข้า ใช้ตัดสินใจ 3 เรื่อง: จัดคนกะไหน เตรียมของล่วงหน้ากี่โมง และควรอัดโปรช่วงไหน — <b>อย่าอัดโปรตอนที่ร้านแน่นอยู่แล้ว</b> เพราะเป็นการลดราคาให้คนที่ยอมจ่ายเต็มอยู่แล้ว ให้อัดช่วงที่ช่องสีอ่อน</p>
+      <h4>Basket Analysis</h4>
+      <p>คู่เมนูที่สั่งด้วยกันบ่อย → ทำเป็นเซ็ตราคาพิเศษ (ขายได้มากขึ้นโดยไม่ต้องลดราคาเยอะ) และใช้เป็นสคริปต์ให้พนักงาน “รับข้าวผัดเพิ่มไหมคะ ลูกค้าส่วนใหญ่สั่งคู่กับเมนูนี้”</p>
+
+      <h3>3. ทำอะไรบ้าง ตามรอบเวลา</h3>
+      <ol>
+        <li><b>ทุกวันหลังปิดร้าน (2 นาที)</b> — ดูยอดขาย/จำนวนบิลเทียบวันเดียวกันสัปดาห์ก่อน และดูว่ามีเมนูไหน P90 พุ่งผิดปกติ</li>
+        <li><b>ทุกสัปดาห์ (15 นาที)</b> — เปิด 7 วันล่าสุด: เช็ก AOV ขึ้นหรือลง, เมนูที่หลุดจากกลุ่ม 80%, เวลารอชั่วโมงไหนแย่ลง</li>
+        <li><b>ทุกเดือน (1 ชั่วโมง)</b> — เปิด 30 วัน: ทำ Menu Engineering เต็มรูปแบบ, ตัดเมนูกลุ่มสุนัข, ปรับราคากลุ่มม้างาน, ทบทวนว่าเดลิเวอรีหลังหักค่าคอมยังคุ้มไหม</li>
+        <li><b>ทุกไตรมาส</b> — เทียบ 90 วันกับไตรมาสก่อน ดูแนวโน้มระยะยาว และวางแผนเมนูตามฤดู</li>
+      </ol>
+
+      <h3>4. กับดักที่เจอบ่อย</h3>
+      <ul>
+        <li><b>ดูยอดขายอย่างเดียว</b> — เมนูขายดีที่สุดอาจเป็นเมนูที่ทำให้ร้านขาดทุน ต้องดูกำไรต่อจานคู่กันเสมอ</li>
+        <li><b>ตัดสินใจจากข้อมูลน้อยเกินไป</b> — เมนูที่ขายได้ต่ำกว่า 10 จานในช่วงที่ดู ยังสรุปไม่ได้ ให้รอข้อมูลเพิ่ม</li>
+        <li><b>ลืมค่าคอมเดลิเวอรี</b> — ยอด 100 บาทจากแกร็บได้จริงประมาณ 70 บาท ถ้าต้นทุนอาหาร 35 บาท กำไรเหลือ 35 ไม่ใช่ 65</li>
+        <li><b>เทียบวันไม่เหมือนกัน</b> — เทียบเสาร์กับเสาร์ อย่าเทียบเสาร์กับอังคาร</li>
+        <li><b>อัดโปรตอนร้านแน่น</b> — ทำให้เสียกำไรฟรีและทำให้ครัวยิ่งช้า</li>
+      </ul>
+
+      <h3>5. ข้อจำกัดของข้อมูลชุดนี้</h3>
+      <ul>
+        <li><b>ไม่มีจำนวนคนต่อโต๊ะ</b> — จึงคิดยอดต่อหัวไม่ได้ ถ้าอยากได้ ต้องเพิ่มช่องกรอกจำนวนคนตอนเปิดโต๊ะ</li>
+        <li><b>ไม่รู้จักลูกค้าเป็นรายคน</b> — ทำการตลาดแบบลูกค้าเก่า/ลูกค้าใหม่ (RFM) ไม่ได้ ต้องมีเบอร์โทรหรือระบบสมาชิกก่อน</li>
+        <li><b>ของที่ลูกค้าอยากสั่งแต่หมด ไม่ถูกบันทึก</b> — ยอดที่เสียไปตรงนี้มองไม่เห็น ถ้าอยากรู้ต้องเก็บประวัติตอนกดว่าของหมด</li>
+        <li><b>วันที่ถูกกดบีบอัดแล้ว</b> เหลือแต่ยอดรวมรายวัน วิเคราะห์รายชั่วโมง/รายโต๊ะ/เวลาครัวของวันนั้นไม่ได้ — ถ้าจะใช้รายงานนี้จริงจัง ให้บีบอัดเฉพาะข้อมูลที่เก่ากว่า 60–90 วัน</li>
+      </ul>
+
+      <h3>6. แท็บ การเงิน และ กระทบยอด — ใช้ยังไง</h3>
+      <p>สองแท็บนี้ดึงข้อมูลจากไฟล์ <b>บัญชีร้าน</b> มารวมกับข้อมูลออเดอร์ จึงตอบได้ในสิ่งที่แต่ละระบบตอบเองไม่ได้ · การกรอกบัญชียังทำที่ไฟล์บัญชีร้านเหมือนเดิม ไฟล์นี้แค่มาอ่าน</p>
+      <h4>สูตรทุกตัวที่ใช้</h4>
+      <div class="kv">
+        <b>ยอดขายสุทธิ</b><span>เงินสด + โอน + คนละครึ่ง − เงินทอนตั้งต้น — เป็นตัวตั้งของทุก % ในหน้านี้</span>
+        <b>Prime Cost</b><span>วัตถุดิบ + ค่าแรง — ตัวชี้เป็นตายที่สำคัญที่สุดของร้านอาหาร เกิน 65–70% คือสัญญาณอันตราย</span>
+        <b>อัตรากำไรส่วนเกิน</b><span>1 − (วัตถุดิบ+ค่าแรง) ÷ ยอดขาย — ขายเพิ่ม 100 บาท เหลือจริงเท่าไรมาจ่ายค่าเช่า/ค่าน้ำค่าไฟ</span>
+        <b>จุดคุ้มทุน/วัน</b><span>(ค่าเช่า + จ่ายประจำ) ÷ อัตรากำไรส่วนเกิน ÷ จำนวนวันเปิดร้าน — ตัวเลขที่ควรติดไว้หน้าเค้าเตอร์</span>
+        <b>ส่วนต่างกระทบยอด</b><span>เงินที่จดจริง − ยอดขายที่ระบบออเดอร์คิดได้ — ห่างเกิน ±5% คือต้องหาสาเหตุ</span>
+        <b>Food Cost ส่วนต่าง</b><span>% จริง − % ทฤษฎี — เกิน 3 จุดคือมีการรั่วไหลของจริง</span>
+      </div>
+      <h4>จังหวะการดู</h4>
+      <ul>
+        <li><b>ทุกวัน</b> — กรอกบัญชีให้ครบตอนปิดร้าน (ในไฟล์บัญชีร้าน) — ถ้าข้ามวัน รายงานทุกหน้าจะเพี้ยน</li>
+        <li><b>ทุกสัปดาห์</b> — เปิดแท็บ กระทบยอด ดูส่วนต่าง ถ้าเกิน 5% ไล่หาวันที่เพี้ยนทันทีตอนที่ยังจำได้</li>
+        <li><b>ทุกสิ้นเดือน</b> — เลือกช่วง 30 วัน ดูแท็บ การเงิน ทั้งหน้า → จดตัวเลข % ไว้เทียบเดือนหน้า</li>
+        <li><b>ทุกไตรมาส</b> — ทบทวนเกณฑ์ % ในไฟล์บัญชีร้านให้ตรงกับความเป็นจริงของร้าน</li>
+      </ul>
+      <h4>เห็นเลขนี้ → ทำอะไรต่อ</h4>
+      <table class="bm">
+        <tr><th>สิ่งที่เห็น</th><th>สาเหตุที่เป็นไปได้</th><th>ลงมือทำอะไร</th></tr>
+        <tr><td>Food Cost สูงเกินเกณฑ์</td><td>ตักเกิน · ของเสีย · ของขึ้นราคา · ซื้อตุนเกินจำเป็น</td><td>ชั่งพอร์ชัน 3 เมนูขายดีสุด · เช็คสต็อกทุกสัปดาห์ · ขึ้นราคาเมนูม้างาน 5–10 บาท</td></tr>
+        <tr><td>ค่าแรงสูงเกินเกณฑ์</td><td>คนมากเกินในช่วงเงียบ หรือยอดขายตก</td><td>ดูตารางช่วงเวลาขายดี แล้วจัดกะตาใหม่ตามชั่วโมงที่คนแน่น</td></tr>
+        <tr><td>กำไรสุทธิต่ำกว่าเกณฑ์</td><td>ราคาขายต่ำเกินไป หรือต้นทุนคงที่หนัก</td><td>ดูแท็บ เมนู &amp; กำไร → ตัดเมนูกลุ่ม “สุนัข” แล้วดัน “ดาว”</td></tr>
+        <tr><td>วันขายต่ำกว่าจุดคุ้มทุนหลายวัน</td><td>เปิดร้านวันที่ขาดทุนโดยไม่รู้ตัว</td><td>ลดชั่วโมงเปิด หรือทำโปรเฉพาะวันนั้น</td></tr>
+        <tr><td>ส่วนต่างกระทบยอดติดลบ</td><td>คิดเงินขาด / ลดราคาเอง / เงินขาดมือ</td><td>ไล่ดูเป็นรายวันในตารางกระทบยอด แล้วตรวจกะทิห้องวันนั้น</td></tr>
+        <tr><td>ส่วนต่างเป็นบวกเยอะ</td><td>ขายหน้าร้านโดยไม่จดออเดอร์ / เมนูยังไม่ตั้งราคา</td><td>บังคับให้ทุกออเดอร์ผ่านระบบ · ตั้งราคาเมนูให้ครบ</td></tr>
+      </table>
+      <p class="hint">ข้อจำกัด: ค่าใช้จ่ายประจำถูกนับตามวันที่จ่ายจริง ถ้าเลือกช่วงสั้นกว่า 1 เดือน % อาจเพี้ยนได้ · แนะนำให้ดูเป็นรายเดือนเต็มเดือน</p>
+
+      <h3>7. วิธีใช้ไฟล์นี้</h3>
+      <ol>
+        <li>เก็บไฟล์ไว้ในเครื่องหรือวางไว้ที่เดียวกับระบบรับออเดอร์ แล้วเปิดด้วยเบราว์เซอร์ — เป็นรายงาน <b>อ่านอย่างเดียว</b> ยกเว้นแท็บตั้งต้นทุน จึงไม่มีทางทำข้อมูลออเดอร์เสียหาย</li>
+        <li>เริ่มจากแท็บ “ตั้งต้นทุน” กรอกต้นทุนวัตถุดิบของเมนูขายดี 20 อันดับแรก แล้วรายงานกำไรทั้งหมดจะแม่นขึ้นทันที</li>
+        <li>กด “ดาวน์โหลด CSV” เมื่ออยากเอาไปทำกราฟเองใน Excel/Google Sheets</li>
+        <li>เปิดด้วย <code>?demo=1</code> ต่อท้ายชื่อไฟล์ เพื่อดูตัวอย่างรายงานด้วยข้อมูลสมมติ (ใช้ตอนสอนพนักงานได้)</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+/* ============ ค่าเชื่อมต่อ (ตรงกับระบบรับออเดอร์) ============ */
+const FB_CONFIG = {
+  apiKey: "AIzaSyDskwJlUNbr3zkKnyY_-n582PdoCrts2AE",
+  authDomain: "supertest01-55ac2.firebaseapp.com",
+  databaseURL: "https://supertest01-55ac2-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "supertest01-55ac2",
+  storageBucket: "supertest01-55ac2.firebasestorage.app",
+  messagingSenderId: "846236839338",
+  appId: "1:846236839338:web:260ca9b6af72c69837cfd3"
+};
+const BASE_PATH = "racing_order_app/";
+const DEMO = new URLSearchParams(location.search).get('demo') === '1';
+
+let db = null;
+if (!DEMO) {
+  try {
+    if (typeof firebase !== 'undefined') { firebase.initializeApp(FB_CONFIG); db = firebase.database(); }
+  } catch (e) { console.error(e); }
+}
+
+/* ============ state ============ */
+let RAW = [];        // ออเดอร์ที่เสิร์ฟแล้วในช่วงที่เลือก
+let SNAPS = {};      // dailySnapshots ในช่วงที่เลือก
+let PRICES = {};     // ราคาขาย
+let COSTS = {};      // ต้นทุนต่อจาน
+let CHEFS = {};      // chefConfig
+let MENUS = [];      // รายชื่อเมนูทั้งหมดจาก menuConfig
+let CFG = { gp: 30 };
+let RANGE = { from: null, to: null };
+let BILLS = [];
+let SNAPONLY = 0;
+
+/* ============ helpers ============ */
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function isoLocal(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+// [FIX เขตเวลา] เดิมตัด "Z" ทิ้ง ทำให้ข้อมูลเก่าที่เก็บเป็น UTC ถูกอ่านเป็นเวลาไทยตรงๆ
+// ผลคือชั่วโมงขายดีเพี้ยนไป 7 ชั่วโมง (ขายจริง 11:00 แต่รายงานขึ้น 04:00)
+// ตอนนี้: มี Z = UTC → แปลงเป็นเวลาไทย (+7) / ไม่มี Z = เวลาไทยอยู่แล้ว → ใช้ตามนั้น
+function parseTs(s) {
+  if (!s) return null;
+  const str = String(s).trim();
+  if (!str) return null;
+  let d;
+  if (/(Z|[+-]\d{2}:?\d{2})$/.test(str)) {
+    d = new Date(str);                       // มีโซนเวลาติดมา → JS แปลงเป็นเวลาเครื่องให้เอง
+  } else {
+    d = new Date(str.replace(' ', 'T'));     // ไม่มีโซน → ถือเป็นเวลาท้องถิ่น
+  }
+  return isNaN(d.getTime()) ? null : d;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function fbSafe(s) { return String(s).replace(/[.#$/\[\]]/g, '_'); }
+function baht(n) { return Math.round(n || 0).toLocaleString('th-TH'); }
+function pct(n) { return (Math.round((n || 0) * 10) / 10).toLocaleString('th-TH') + '%'; }
+function num1(n) { return (Math.round((n || 0) * 10) / 10).toLocaleString('th-TH'); }
+function quantile(arr, q) {
+  if (!arr.length) return 0;
+  const a = arr.slice().sort((x, y) => x - y);
+  const pos = (a.length - 1) * q, b = Math.floor(pos), rest = pos - b;
+  return a[b + 1] !== undefined ? a[b] + rest * (a[b + 1] - a[b]) : a[b];
+}
+function priceOf(item) {
+  if (PRICES[item] != null) return Number(PRICES[item]) || 0;
+  const k = fbSafe(item);
+  return Number(PRICES[k] || 0) || 0;
+}
+function costOf(item) {
+  if (COSTS[item] != null) return Number(COSTS[item]) || 0;
+  const k = fbSafe(item);
+  return Number(COSTS[k] || 0) || 0;
+}
+function gpRate() { return (Number(CFG.gp) || 0) / 100; }
+function channelOf(table) {
+  const t = String(table || '').trim();
+  if (/แกร/.test(t)) return 'แกร็บ';
+  if (/ไลน์|LINE/i.test(t)) return 'ไลน์แมน';
+  if (/ช็อป|ชอป|Shopee/i.test(t)) return 'ช้อปปี้';
+  if (/กลับบ้าน/.test(t)) return 'กลับบ้าน';
+  if (/จอง/.test(t)) return 'โต๊ะจอง';
+  return 'ทานที่ร้าน';
+}
+const DELIVERY = ['แกร็บ', 'ไลน์แมน', 'ช้อปปี้'];
+function bar(v, max, cls) {
+  const w = max > 0 ? Math.max(2, Math.min(100, v / max * 100)) : 0;
+  return '<div class="bar ' + (cls || '') + '"><i style="width:' + w + '%"></i></div>';
+}
+function tbl(head, rows, opt) {
+  opt = opt || {};
+  const num = opt.num || [];
+  if (!rows.length) return '<div class="empty">' + (opt.empty || 'ไม่มีข้อมูลในช่วงที่เลือก') + '</div>';
+  let h = '<div class="tw"><table><thead><tr>';
+  head.forEach((c, i) => { h += '<th class="' + (num.indexOf(i) >= 0 ? 'n' : '') + '">' + c + '</th>'; });
+  h += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr>';
+    r.forEach((c, i) => { h += '<td class="' + (num.indexOf(i) >= 0 ? 'n' : '') + '">' + c + '</td>'; });
+    h += '</tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+function kpi(label, value, delta) {
+  let d = '';
+  if (delta != null && isFinite(delta)) {
+    const up = delta >= 0;
+    d = '<div class="d ' + (up ? 'up' : 'down') + '">' + (up ? '▲' : '▼') + ' ' +
+      Math.abs(Math.round(delta * 10) / 10) + '% เทียบครึ่งก่อน</div>';
+  }
+  return '<div class="kpi"><div class="l">' + label + '</div><div class="v">' + value + '</div>' + d + '</div>';
+}
+
+/* ============ โหลดข้อมูล ============ */
+function rangeDates() {
+  const sel = document.getElementById('rangeSel').value;
+  const to = new Date(); to.setHours(23, 59, 59, 999);
+  let from = new Date(); from.setHours(0, 0, 0, 0);
+  if (sel === 'custom') {
+    const f = document.getElementById('dFrom').value, t = document.getElementById('dTo').value;
+    if (f) { from = new Date(f + 'T00:00:00'); }
+    if (t) { const d = new Date(t + 'T23:59:59'); if (!isNaN(d)) return { from, to: d }; }
+    return { from, to };
+  }
+  from.setDate(from.getDate() - (Number(sel) - 1));
+  return { from, to };
+}
+
+async function loadAll() {
+  document.getElementById('loader').classList.remove('hidden');
+  RANGE = rangeDates();
+  if (DEMO) { buildDemo(); afterLoad(); return; }
+  if (!db) {
+    document.getElementById('loader').innerHTML =
+      'เชื่อมต่อ Firebase ไม่ได้ — ตรวจอินเทอร์เน็ต หรือเปิดไฟล์นี้ด้วย <code>?demo=1</code> เพื่อดูตัวอย่าง';
+    return;
+  }
+  try {
+    const fromStr = isoLocal(RANGE.from) + 'T00:00:00';
+    const toStr = isoLocal(RANGE.to) + 'T23:59:59';
+    const [coSnap, dsSnap, prSnap, csSnap, chSnap, mcSnap, cfSnap] = await Promise.all([
+      db.ref(BASE_PATH + 'completedOrders').orderByChild('timestamp').startAt(fromStr).endAt(toStr).once('value'),
+      db.ref(BASE_PATH + 'dailySnapshots').once('value'),
+      db.ref(BASE_PATH + 'menuPrices').once('value'),
+      db.ref(BASE_PATH + 'menuCost').once('value'),
+      db.ref(BASE_PATH + 'chefConfig').once('value'),
+      db.ref(BASE_PATH + 'menuConfig').once('value'),
+      db.ref(BASE_PATH + 'reportConfig').once('value')
+    ]);
+
+    RAW = [];
+    const co = coSnap.val() || {};
+    Object.keys(co).forEach(k => {
+      const o = co[k]; if (!o || !o.item) return;
+      const ts = parseTs(o.timestamp); if (!ts) return;
+      if (ts < RANGE.from || ts > RANGE.to) return;
+      const done = parseTs(o.completedAt);
+      let prep = null;
+      if (done) { const m = (done - ts) / 60000; if (m >= 0 && m <= 240) prep = m; }
+      RAW.push({
+        item: String(o.item), qty: Number(o.quantity) || 1, comment: String(o.comment || ''),
+        table: String(o.table || ''), staff: String(o.staff || ''), ts, prep
+      });
+    });
+
+    SNAPS = {};
+    const ds = dsSnap.val() || {};
+    Object.keys(ds).forEach(d => {
+      const dt = new Date(d + 'T12:00:00');
+      if (isNaN(dt) || dt < RANGE.from || dt > RANGE.to) return;
+      SNAPS[d] = ds[d];
+    });
+
+    PRICES = prSnap.val() || {};
+    COSTS = csSnap.val() || {};
+    CHEFS = {};
+    const ch = chSnap.val() || {};
+    Object.keys(ch).forEach(id => {
+      if (id === '__nonBatchable__') return;
+      const kws = ch[id] && ch[id].keywords;
+      if (Array.isArray(kws)) CHEFS[id] = kws;
+      else if (kws && typeof kws === 'object') CHEFS[id] = Object.values(kws);
+    });
+    MENUS = [];
+    MENU_CAT = {};
+    const mc = mcSnap.val() || {};
+    if (mc.cats) Object.keys(mc.cats).forEach(ck => {
+      const c = mc.cats[ck] || {};
+      const cname = String(c.name || c.title || ck || '');
+      const items = Array.isArray(c.items) ? c.items : (c.items ? Object.values(c.items) : []);
+      items.forEach(i => { if (i) { MENUS.push(String(i)); MENU_CAT[String(i)] = cname; } });
+    });
+    const cf = cfSnap.val() || {};
+    CFG = { gp: cf.gp != null ? Number(cf.gp) : 30 };
+
+    await loadFinance();
+    await loadGuests();
+    await loadPos();
+    afterLoad();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loader').innerHTML =
+      'โหลดข้อมูลไม่สำเร็จ: ' + esc(e && e.message ? e.message : e) +
+      '<br><br>ถ้าข้อความบอกว่า index ไม่ได้ตั้ง ให้ไปเพิ่ม <code>".indexOn": "timestamp"</code> ให้ completedOrders ใน Firebase Rules';
+  }
+}
+
+function afterLoad() {
+  buildBills();
+  const rawDates = new Set(RAW.map(r => isoLocal(r.ts)));
+  SNAPONLY = Object.keys(SNAPS).filter(d => !rawDates.has(d)).length;
+  document.getElementById('loader').classList.add('hidden');
+  renderAll();
+}
+
+/* ============ bills ============ */
+function buildBills() {
+  const byTable = {};
+  RAW.forEach(r => { (byTable[r.table] = byTable[r.table] || []).push(r); });
+  BILLS = [];
+  Object.keys(byTable).forEach(t => {
+    const list = byTable[t].sort((a, b) => a.ts - b.ts);
+    let cur = null;
+    list.forEach(r => {
+      if (!cur || (r.ts - cur.end) / 60000 > 90) {
+        cur = { table: t, channel: channelOf(t), staff: r.staff, start: r.ts, end: r.ts, items: [], qty: 0, rev: 0, cost: 0 };
+        BILLS.push(cur);
+      }
+      cur.end = r.ts;
+      cur.items.push(r.item);
+      cur.qty += r.qty;
+      cur.rev += priceOf(r.item) * r.qty;
+      cur.cost += costOf(r.item) * r.qty;
+      if (!cur.staff && r.staff) cur.staff = r.staff;
+    });
+  });
+  BILLS.sort((a, b) => a.start - b.start);
+}
+
+/* ============ aggregations ============ */
+function dailySeries() {
+  const map = {};
+  const cur = new Date(RANGE.from); cur.setHours(12, 0, 0, 0);
+  const end = new Date(RANGE.to);
+  while (cur <= end) {
+    map[isoLocal(cur)] = { rev: 0, qty: 0, bills: 0, snapOnly: false };
+    cur.setDate(cur.getDate() + 1);
+  }
+  RAW.forEach(r => {
+    const d = isoLocal(r.ts); if (!map[d]) map[d] = { rev: 0, qty: 0, bills: 0, snapOnly: false };
+    map[d].rev += priceOf(r.item) * r.qty; map[d].qty += r.qty;
+  });
+  BILLS.forEach(b => { const d = isoLocal(b.start); if (map[d]) map[d].bills++; });
+  Object.keys(SNAPS).forEach(d => {
+    if (!map[d]) map[d] = { rev: 0, qty: 0, bills: 0, snapOnly: false };
+    if (map[d].qty > 0) return;                 // มีข้อมูลรายจานแล้ว ไม่นับซ้ำ
+    const s = SNAPS[d] || {};
+    map[d].rev = Number(s.totalRevenue) || 0;
+    map[d].qty = s.items ? Object.values(s.items).reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+    map[d].snapOnly = true;
+  });
+  return Object.keys(map).sort().map(d => Object.assign({ date: d }, map[d]));
+}
+
+function menuAgg() {
+  const m = {};
+  const add = (item, qty, rev, cost) => {
+    const a = m[item] = m[item] || { qty: 0, rev: 0, cost: 0 };
+    a.qty += qty; a.rev += rev; a.cost += cost;
+  };
+  RAW.forEach(r => add(r.item, r.qty, priceOf(r.item) * r.qty, costOf(r.item) * r.qty));
+  const rawDates = new Set(RAW.map(r => isoLocal(r.ts)));
+  Object.keys(SNAPS).forEach(d => {
+    if (rawDates.has(d)) return;                // กันนับซ้ำกับข้อมูลรายจาน
+    const s = SNAPS[d] || {}; if (!s.items) return;
+    const ps = s.priceSnapshot || {};
+    Object.keys(s.items).forEach(k => {
+      const item = String(k).split('__')[0];
+      const q = Number(s.items[k]) || 0;
+      const p = Number(ps[item] != null ? ps[item] : priceOf(item)) || 0;
+      add(item, q, p * q, costOf(item) * q);
+    });
+  });
+  return m;
+}
+
+function chefOf(item) {
+  let best = null, bestLen = 0;
+  Object.keys(CHEFS).forEach(id => {
+    (CHEFS[id] || []).forEach(k => {
+      const kw = String(k || '').trim();
+      if (kw && item.indexOf(kw) >= 0 && kw.length > bestLen) { best = id; bestLen = kw.length; }
+    });
+  });
+  return best;
+}
+const CHEF_NAME = { kik: 'กิ๊ก', jeab: 'เจี๊ยบ', nan: 'พลโท', see: 'ซี' };
+
+
+/* ============ โมดูลการเงิน: อ่านจากระบบบัญชีร้าน ============ */
+const FIN_PATH = 'restaurant_pos_v1/';
+const FIN_DEF_BENCH = {
+  labor: { lo: 15, hi: 25 }, foodCost: { lo: 28, hi: 38 }, rent: { lo: 0, hi: 10 },
+  periodic: { lo: 0, hi: 10 }, prime: { lo: 0, hi: 65 }, expenses: { lo: 0, hi: 85 }, profit: { lo: 10, hi: 100 }
+};
+let FIN = { daily: {}, periodic: [], bench: null, loaded: false, error: '' };
+
+function bench(k) {
+  const d = FIN_DEF_BENCH[k] || { lo: 0, hi: 100 };
+  const r = (FIN.bench && FIN.bench[k]) || {};
+  const lo = (r.lo != null && isFinite(Number(r.lo))) ? Number(r.lo) : d.lo;
+  const hi = (r.hi != null && isFinite(Number(r.hi))) ? Number(r.hi) : d.hi;
+  return { lo, hi };
+}
+function benchLabel(k) {
+  const b = bench(k);
+  if (k === 'profit') return '≥ ' + num1(b.lo) + '%';
+  if (b.lo > 0) return num1(b.lo) + '–' + num1(b.hi) + '%';
+  return '≤ ' + num1(b.hi) + '%';
+}
+const FIN_TAG = {
+  good: ['#1e7742', '#e8f6ed', 'อยู่ในเกณฑ์'],
+  bad: ['#b32424', '#fdeaea', 'สูงเกินเกณฑ์'],
+  info: ['#24549e', '#e9f0fb', 'ต่ำกว่าเกณฑ์'],
+  warn: ['#a8650f', '#fdf2e3', 'เฉียดเกณฑ์'],
+  na: ['#8a857c', '#f2f0ec', '–']
+};
+function finTag(k, p) {
+  if (p == null) return 'na';
+  const b = bench(k);
+  if (k === 'profit') { if (p >= b.lo) return 'good'; if (p >= b.lo / 2) return 'warn'; return 'bad'; }
+  if (p > b.hi) return 'bad';
+  if (b.lo > 0 && p < b.lo) return 'info';
+  return 'good';
+}
+function finTagHtml(t) {
+  const m = FIN_TAG[t] || FIN_TAG.na;
+  return '<span class="ftag" style="color:' + m[0] + ';background:' + m[1] + '">' + m[2] + '</span>';
+}
+function finBar(p, t) {
+  const c = { good: '#0F6B5C', bad: '#C1533A', info: '#2f6fd0', warn: '#C98A25', na: '#ccc7bd' }[t] || '#ccc7bd';
+  const w = Math.max(0, Math.min(100, p || 0));
+  return '<div class="fbar"><i style="width:' + w + '%;background:' + c + '"></i></div>';
+}
+function fpct(part, whole) { return (whole > 0) ? (part / whole * 100) : null; }
+function fpctTxt(part, whole) { const p = fpct(part, whole); return p == null ? '–' : num1(p) + '%'; }
+
+async function loadFinance() {
+  FIN = { daily: {}, periodic: [], bench: null, loaded: false, error: '' };
+  if (!db || DEMO) return;
+  try {
+    const dFrom = isoLocal(RANGE.from), dTo = isoLocal(RANGE.to);
+    const [dSnap, pSnap, bSnap] = await Promise.all([
+      db.ref(FIN_PATH + 'daily').orderByKey().startAt(dFrom).endAt(dTo).once('value'),
+      db.ref(FIN_PATH + 'periodic_expenses').once('value'),
+      db.ref(FIN_PATH + 'benchmarks').once('value')
+    ]);
+    FIN.daily = dSnap.val() || {};
+    const pe = pSnap.val() || {};
+    Object.keys(pe).forEach(k => {
+      const o = pe[k]; if (!o) return;
+      const d = String(o.date || '');
+      if (d >= dFrom && d <= dTo) {
+        FIN.periodic.push({
+          category: String(o.category || 'อื่นๆ'), date: d,
+          amount: Number(o.amount) || 0, note: String(o.note || '')
+        });
+      }
+    });
+    FIN.bench = bSnap.val() || null;
+    FIN.loaded = true;
+  } catch (e) {
+    console.error(e);
+    FIN.error = (e && e.message) ? e.message : String(e);
+  }
+}
+
+function finTotals() {
+  const t = {
+    days: [], activeDays: 0, sales: 0, net: 0, changeFloat: 0,
+    rent: 0, labor: 0, market: 0, purch: 0, dailyExp: 0,
+    periodicExp: 0, periodicByCat: {}, cash: 0, transfer: 0, half: 0
+  };
+  Object.keys(FIN.daily).sort().forEach(d => {
+    const r = FIN.daily[d] || {};
+    const net = Number(r.netSales) || 0;
+    const row = {
+      date: d, net: net, sales: Number(r.totalSales) || 0,
+      rent: Number(r.rent) || 0, labor: Number(r.labor) || 0,
+      market: Number(r.marketNet) || 0, purch: Number(r.purchasesTotal) || 0,
+      exp: Number(r.totalExpenses) || 0, profit: Number(r.profit) || 0,
+      cash: Number(r.cashTotal) || 0, transfer: Number(r.transfer) || 0, half: Number(r.halfhalfTotal) || 0
+    };
+    t.days.push(row);
+    if (net > 0 || row.exp > 0) t.activeDays++;
+    t.sales += row.sales; t.net += net; t.rent += row.rent; t.labor += row.labor;
+    t.market += row.market; t.purch += row.purch; t.dailyExp += row.exp;
+    t.cash += row.cash; t.transfer += row.transfer; t.half += row.half;
+  });
+  FIN.periodic.forEach(p => {
+    t.periodicExp += p.amount;
+    t.periodicByCat[p.category] = (t.periodicByCat[p.category] || 0) + p.amount;
+  });
+  t.foodCost = t.market + t.purch;
+  t.prime = t.foodCost + t.labor;
+  t.expenses = t.dailyExp + t.periodicExp;
+  t.profit = t.net - t.expenses;
+  return t;
+}
+
+function renderFinance() {
+  const box = document.getElementById('finBody');
+  if (!box) return;
+  if (DEMO) { box.innerHTML = '<div class="empty">โหมดตัวอย่าง (?demo=1) ไม่ดึงข้อมูลบัญชีจริง</div>'; return; }
+  if (FIN.error) { box.innerHTML = '<div class="note warn">ดึงข้อมูลบัญชีไม่สำเร็จ: ' + esc(FIN.error) + '</div>'; return; }
+  const t = finTotals();
+  if (!t.days.length && !t.periodicExp) {
+    box.innerHTML = '<div class="empty">ช่วงที่เลือกยังไม่มีการบันทึกบัญชี — กรอกที่ไฟล์ บัญชีร้าน ก่อน</div>';
+    return;
+  }
+  const n = t.net;
+  const marginPct = fpct(t.profit, n);
+  const h = [];
+
+  h.push('<div class="fin-t">' +
+    finTile('ยอดขายสุทธิ', baht(n), t.activeDays + ' วันที่เปิดร้าน', '') +
+    finTile('รายจ่ายรวม', baht(t.expenses), 'รายวัน ' + baht(t.dailyExp) + ' + ประจำ ' + baht(t.periodicExp), 'fin-neg') +
+    finTile('กำไรสุทธิ', baht(t.profit), fpctTxt(t.profit, n) + ' ของยอดขาย', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
+    finTile('กำไรเฉลี่ย/วันเปิดร้าน', baht(t.activeDays ? t.profit / t.activeDays : 0), 'ยอดขายเฉลี่ย ' + baht(t.activeDays ? n / t.activeDays : 0), '') +
+    '</div>');
+
+  // โครงสร้างต้นทุน
+  const rows = [
+    ['labor', 'ค่าแรงลูกน้อง', t.labor],
+    ['foodCost', 'ต้นทุนวัตถุดิบ (ตลาด+ร้านค้า)', t.foodCost],
+    ['rent', 'ค่าเช่า/ที่พัก', t.rent],
+    ['periodic', 'ค่าใช้จ่ายประจำ', t.periodicExp],
+    ['prime', 'Prime Cost (วัตถุดิบ+ค่าแรง)', t.prime],
+    ['expenses', 'รายจ่ายรวมทั้งหมด', t.expenses],
+    ['profit', 'กำไรสุทธิ', t.profit]
+  ];
+  let tb = '<h3>โครงสร้างต้นทุน (% ของยอดขายสุทธิ)</h3>' +
+    '<table class="bm"><tr><th>รายการ</th><th class="r">บาท</th><th class="r">%</th><th>สัดส่วน</th><th>เกณฑ์</th><th>สถานะ</th></tr>';
+  rows.forEach(r => {
+    const p = fpct(r[2], n);
+    const tag = finTag(r[0], p);
+    tb += '<tr><td>' + r[1] + '</td><td class="r">' + baht(r[2]) + '</td><td class="r"><b>' + (p == null ? '–' : num1(p) + '%') + '</b></td>' +
+      '<td style="min-width:110px">' + finBar(p, tag) + '</td><td>' + benchLabel(r[0]) + '</td><td>' + finTagHtml(tag) + '</td></tr>';
+  });
+  tb += '</table><p class="hint">เกณฑ์นี้ดึงมาจากที่คุณตั้งไว้ในไฟล์ บัญชีร้าน → ตั้งค่า ' + (FIN.bench ? '(ใช้ค่าของร้านคุณ)' : '(ตอนนี้ใช้ค่ามาตรฐาน)') + '</p>';
+  h.push(tb);
+
+  // จุดคุ้มทุน
+  const fixed = t.rent + t.periodicExp;
+  const varCost = t.foodCost + t.labor;
+  const cm = n > 0 ? (1 - varCost / n) : 0;
+  let be = '<h3>จุดคุ้มทุน (Break-even)</h3>';
+  if (n > 0 && cm > 0) {
+    const beTotal = fixed / cm;
+    const beDay = t.activeDays ? beTotal / t.activeDays : 0;
+    const below = t.days.filter(d => d.net > 0 && d.net < beDay).length;
+    be += '<div class="fin-t">' +
+      finTile('ต้นทุนคงที่', baht(fixed), 'ค่าเช่า + จ่ายประจำ', '') +
+      finTile('อัตรากำไรส่วนเกิน', num1(cm * 100) + '%', 'ขาย 100 บาท เหลือ ' + num1(cm * 100) + ' บาทไปจ่ายต้นทุนคงที่', '') +
+      finTile('ต้องขายให้ได้/วัน', baht(beDay), 'ถึงจะไม่ขาดทุน', '') +
+      finTile('วันที่ขายต่ำกว่าจุดคุ้มทุน', below + ' วัน', 'จาก ' + t.activeDays + ' วันที่เปิดร้าน', below > 0 ? 'fin-neg' : 'fin-pos') +
+      '</div>' +
+      '<p class="hint">สูตร: ต้นทุนคงที่ ÷ อัตรากำไรส่วนเกิน · ถือค่าแรงเป็นต้นทุนผันแปรตามยอดขาย</p>';
+  } else {
+    be += '<div class="empty">คำนวณไม่ได้ — ต้นทุนผันแปรสูงกว่ายอดขาย</div>';
+  }
+  h.push(be);
+
+  // จ่ายประจำแยกหมวด
+  const cats = Object.keys(t.periodicByCat).sort((a, b) => t.periodicByCat[b] - t.periodicByCat[a]);
+  if (cats.length) {
+    let pt = '<h3>ค่าใช้จ่ายประจำแยกหมวด</h3><table class="bm"><tr><th>หมวด</th><th class="r">บาท</th><th class="r">% ของยอดขาย</th></tr>';
+    cats.forEach(c => { pt += '<tr><td>' + esc(c) + '</td><td class="r">' + baht(t.periodicByCat[c]) + '</td><td class="r">' + fpctTxt(t.periodicByCat[c], n) + '</td></tr>'; });
+    pt += '</table>';
+    h.push(pt);
+  }
+
+  // กำไรรายวันของสัปดาห์
+  const dw = [];
+  for (let i = 0; i < 7; i++) dw.push({ net: 0, profit: 0, n: 0 });
+  t.days.forEach(d => {
+    if (d.net <= 0 && d.exp <= 0) return;
+    const idx = new Date(d.date + 'T12:00:00').getDay();
+    dw[idx].net += d.net; dw[idx].profit += d.profit; dw[idx].n++;
+  });
+  let dwt = '<h3>กำไรรายวันของสัปดาห์</h3><p class="hint">ขายดี ไม่ได้แปลว่ากำไรดี — ดูคอลัมน์ % กำไร</p>' +
+    '<table class="bm"><tr><th>วัน</th><th class="r">วันที่เปิด</th><th class="r">ยอดขายเฉลี่ย/วัน</th><th class="r">กำไรเฉลี่ย/วัน</th><th class="r">% กำไร</th></tr>';
+  for (let i = 0; i < 7; i++) {
+    if (!dw[i].n) continue;
+    const mp = fpct(dw[i].profit, dw[i].net);
+    dwt += '<tr><td>' + DOW_TH[i] + '</td><td class="r">' + dw[i].n + '</td><td class="r">' + baht(dw[i].net / dw[i].n) + '</td><td class="r">' + baht(dw[i].profit / dw[i].n) + '</td><td class="r"><b>' + (mp == null ? '–' : num1(mp) + '%') + '</b></td></tr>';
+  }
+  dwt += '</table>';
+  h.push(dwt);
+
+  box.innerHTML = h.join('');
+}
+
+function finTile(l, v, s, cls) {
+  return '<div><div class="l">' + l + '</div><div class="v ' + (cls || '') + '">' + v + '</div><div class="s">' + (s || '') + '</div></div>';
+}
+
+
+/* ============ เครื่องเก็บเงิน (pos_cashier_v1) ============ */
+const POS_PATH = 'pos_cashier_v1/';
+// ตัดของทอด / ข้าว / ขนม / น้ำ ออกจากการเทียบจำนวนจาน
+let MENU_CAT = {};
+const PLATE_EXCLUDE_RE = /ทอด|ข้าว|ขนม|น้ำ|เครื่องดื่ม|อัดลม|โซดา|เบียร์|เหล้า|สิงห์|ค่ากล่อง|กาแฟ|ชา|โอเลี้ยง/;
+const PLATE_EXCLUDE_LABEL = 'ของทอด · ข้าว · ขนม · น้ำ/เครื่องดื่ม';
+function isCorePlate(name) {
+  const n = String(name || '');
+  if (!n) return false;
+  if (PLATE_EXCLUDE_RE.test(n)) return false;
+  const cat = MENU_CAT[n];
+  if (cat && PLATE_EXCLUDE_RE.test(cat)) return false;
+  return true;
+}
+let POSD = { bills: [], loaded: false, error: '' };
+
+async function loadPos() {
+  POSD = { bills: [], loaded: false, error: '' };
+  if (!db || DEMO) return;
+  try {
+    const dates = [];
+    const d = new Date(RANGE.from.getFullYear(), RANGE.from.getMonth(), RANGE.from.getDate());
+    const end = new Date(RANGE.to.getFullYear(), RANGE.to.getMonth(), RANGE.to.getDate());
+    while (d <= end && dates.length < 400) { dates.push(isoLocal(d)); d.setDate(d.getDate() + 1); }
+    const snaps = await Promise.all(dates.map(ds => db.ref(POS_PATH + 'bills/' + ds).once('value')));
+    snaps.forEach((sn, i) => {
+      const v = sn.val() || {};
+      Object.keys(v).forEach(k => {
+        const b = v[k]; if (!b) return;
+        POSD.bills.push({
+          date: dates[i],
+          billNo: String(b.billNo || ''),
+          table: String(b.table || ''),
+          guests: Number(b.guests) || 0,
+          qty: Number(b.qty) || 0,
+          total: Number(b.total) || 0,
+          discount: Number(b.discount) || 0,
+          dineTotal: Number(b.dineTotal) || 0,
+          awayTotal: Number(b.awayTotal) || 0,
+          method: String(b.method || 'เงินสด'),
+          staff: String(b.staff || '–'),
+          minutes: Number(b.minutes) || 0,
+          closedAt: parseTs(b.closedAt),
+          items: Array.isArray(b.items) ? b.items : (b.items ? Object.values(b.items) : []),
+          mergedFrom: String(b.mergedFrom || ''),
+          segments: Array.isArray(b.segments) ? b.segments : (b.segments ? Object.values(b.segments) : [])
+        });
+      });
+    });
+    POSD.bills.sort((a, b) => (a.closedAt && b.closedAt) ? a.closedAt - b.closedAt : 0);
+    POSD.loaded = true;
+  } catch (e) {
+    console.error(e);
+    POSD.error = (e && e.message) ? e.message : String(e);
+  }
+}
+
+function posIsDine(t) { return channelOf(t) === DINE_LABEL || channelOf(t) === 'โต๊ะจอง'; }
+
+function renderPos() {
+  const box = document.getElementById('posBody');
+  if (!box) return;
+  if (DEMO) { box.innerHTML = '<div class="empty">โหมดตัวอย่าง (?demo=1) ไม่ดึงบิลจริง</div>'; return; }
+  if (POSD.error) { box.innerHTML = '<div class="note warn">ดึงข้อมูลเครื่องเก็บเงินไม่สำเร็จ: ' + esc(POSD.error) + '</div>'; return; }
+  const B = POSD.bills;
+  if (!B.length) {
+    box.innerHTML = '<div class="empty">ช่วงที่เลือกยังไม่มีบิลจากเครื่องเก็บเงิน — เริ่มเก็บเงินผ่านไฟล์ เครื่องเก็บเงิน แล้วข้อมูลจะขึ้นที่นี่เอง</div>';
+    return;
+  }
+  const rev = B.reduce((a, b) => a + b.total, 0);
+  const disc = B.reduce((a, b) => a + b.discount, 0);
+  const plates = B.reduce((a, b) => a + b.qty, 0);
+  const away = B.reduce((a, b) => a + b.awayTotal, 0);
+  /* บิลที่รวมจ่าย = คนละโต๊ะ แค่จ่ายแทนกัน → กางออกเป็นรายโต๊ะก่อนคิดเฉลี่ย */
+  const SEATS = [];
+  let mergedBills = 0, mergedSeats = 0;
+  B.forEach(b => {
+    const sg = (b.segments || []).filter(x => x && x.table);
+    if (sg.length > 1) {
+      mergedBills++; mergedSeats += sg.length;
+      sg.forEach(x => SEATS.push({ date: b.date, table: String(x.table), guests: Number(x.guests) || 0,
+        total: Number(x.amount) || 0, qty: Number(x.qty) || 0, staff: b.staff, closedAt: b.closedAt,
+        merged: true, payTable: b.table, billNo: b.billNo }));
+    } else {
+      SEATS.push({ date: b.date, table: b.table, guests: b.guests, total: b.total, qty: b.qty,
+        staff: b.staff, closedAt: b.closedAt, merged: false, payTable: b.table, billNo: b.billNo });
+    }
+  });
+  const dineB = SEATS.filter(x => posIsDine(x.table) && x.guests > 0);
+  const guests = dineB.reduce((a, x) => a + x.guests, 0);
+  const dineRev = dineB.reduce((a, x) => a + x.total, 0);
+  const mins = B.filter(b => b.minutes > 0).map(b => b.minutes);
+  const avgMin = mins.length ? mins.reduce((a, c) => a + c, 0) / mins.length : 0;
+  const days = {};
+  B.forEach(b => { (days[b.date] = days[b.date] || { rev: 0, bills: 0, guests: 0, qty: 0, seats: 0 }); days[b.date].rev += b.total; days[b.date].bills++; days[b.date].guests += b.guests; days[b.date].qty += b.qty; });
+  SEATS.forEach(x => { if (days[x.date]) days[x.date].seats++; });
+  const dayKeys = Object.keys(days).sort();
+  const nDays = dayKeys.length || 1;
+
+  const h = [];
+  h.push('<div class="fin-t">' +
+    finTile('ยอดเก็บจริง', baht(rev), B.length + ' บิล · ' + nDays + ' วัน', 'fin-pos') +
+    finTile('เฉลี่ยต่อบิล', baht(rev / B.length), 'เฉลี่ย ' + num1(plates / B.length) + ' จาน/บิล', '') +
+    finTile('ยอดต่อหัว', guests ? baht(dineRev / guests) : '–', guests ? (guests.toLocaleString() + ' คน (ทานที่ร้าน)') : 'ยังไม่มีจำนวนคน', '') +
+    finTile('เวลานั่งเฉลี่ย', avgMin ? Math.round(avgMin) + ' นาที' : '–', avgMin ? ('รอบโต๊ะประมาณ ' + num1(600 / avgMin) + ' รอบ/โต๊ะ/วัน') : '', '') +
+    '</div>');
+
+  h.push('<div class="fin-t" style="margin-top:10px">' +
+    finTile('ยอดขายเฉลี่ย/วัน', baht(rev / nDays), num1(B.length / nDays) + ' บิล/วัน', '') +
+    finTile('ยอดกลับบ้าน (ในบิล)', baht(away), rev ? (Math.round(away / rev * 1000) / 10) + '% ของยอดขาย' : '', '') +
+    finTile('ส่วนลดรวม', baht(disc), rev ? (Math.round(disc / (rev + disc) * 1000) / 10) + '% ของยอดเต็ม' : '', disc > 0 ? 'fin-neg' : '') +
+    finTile('โต๊ะที่ให้บริการ', SEATS.length.toLocaleString() + ' โต๊ะ', mergedBills ? ('นับแยกโต๊ะแล้ว — มี ' + mergedBills + ' บิลที่จ่ายแทนกัน') : ('เท่ากับจำนวนบิล — ไม่มีการรวมบิล'), '') +
+    finTile('จำนวนจานที่เก็บเงิน', plates.toLocaleString() + ' จาน', 'นับจากหน้าโต๊ะจริง', '') +
+    '</div>');
+
+  /* ---- พนักงานลืมลงออเดอร์กี่ % ---- */
+  let posDinePlates = 0, posSkipped = 0;
+  B.filter(b => posIsDine(b.table)).forEach(b => {
+    if (b.items && b.items.length) {
+      b.items.forEach(x => {
+        const q = Number(x && x.qty) || 0;
+        if (isCorePlate(x && x.name)) posDinePlates += q; else posSkipped += q;
+      });
+    } else {
+      posDinePlates += b.qty;
+    }
+  });
+  let ordPlates = 0, ordSkipped = 0;
+  RAW.forEach(r => {
+    const ch = channelOf(r.table);
+    if (ch !== DINE_LABEL && ch !== 'โต๊ะจอง') return;
+    if (isCorePlate(r.item)) ordPlates += r.qty; else ordSkipped += r.qty;
+  });
+  if (posDinePlates > 0 && ordPlates > 0) {
+    const gap = posDinePlates - ordPlates;
+    const gapPct = Math.round(gap / posDinePlates * 1000) / 10;
+    const cls = gapPct >= 10 ? 'warn' : (gapPct <= -10 ? 'warn' : 'ok');
+    h.push('<h3 style="margin-top:22px">พนักงานลืมลงออเดอร์กี่ %</h3>');
+    h.push('<div class="note ' + cls + '">แคชเชียร์นับจานทานที่ร้านได้ <b>' + posDinePlates.toLocaleString() + '</b> จาน · ' +
+      'ระบบออเดอร์มี <b>' + ordPlates.toLocaleString() + '</b> จาน → ต่างกัน <b>' + (gap >= 0 ? '+' : '') + gap.toLocaleString() + ' จาน (' + gapPct + '%)</b><br>' +
+      (gapPct >= 10 ? 'แปลว่ามีอาหารออกจากครัวโดยไม่ได้ลงระบบ — กระทบยอดเมนูและสต็อกจะเพี้ยน' :
+       (gapPct <= -10 ? 'ระบบออเดอร์มากกว่าที่เก็บเงิน — อาจมีการเก็บเงินขาด หรือนับจานตกหล่น' :
+        'ตรงกันในเกณฑ์ที่ยอมรับได้ การลงออเดอร์ถือว่าครบ')) +
+      '<br><span class="hint">นับเฉพาะอาหารจานหลัก — ตัด ' + PLATE_EXCLUDE_LABEL + ' ออกทั้งสองฝั่ง (ตัดออก: ฝั่งเก็บเงิน ' + posSkipped.toLocaleString() + ' จาน · ฝั่งออเดอร์ ' + ordSkipped.toLocaleString() + ' จาน)</span></div>');
+  }
+
+  /* ---- แยกรายโต๊ะ (บิลที่รวมจ่าย ถูกกระจายกลับเป็นรายโต๊ะแล้ว) ---- */
+  const byT = {};
+  SEATS.filter(x => posIsDine(x.table)).forEach(x => {
+    const o = byT[x.table] = byT[x.table] || { n: 0, rev: 0, qty: 0, guests: 0, merged: 0 };
+    o.n++; o.rev += x.total; o.qty += x.qty; o.guests += x.guests; if (x.merged) o.merged++;
+  });
+  const tKeys = Object.keys(byT).sort((a, c) => byT[c].rev - byT[a].rev);
+  if (tKeys.length) {
+    h.push('<h3 style="margin-top:22px">แยกรายโต๊ะ (จากบิลจริง)</h3>');
+    h.push('<p class="hint">ถึงแม้ลูกค้าจะจ่ายแทนกันข้ามโต๊ะ ระบบก็แยกยอดกลับไปโต๊ะที่นั่งจริง — ตัวเลขต่อหัวจึงไม่เพี้ยน</p>');
+    h.push(tbl(['โต๊ะ', 'รอบที่ใช้', 'ลูกค้า (คน)', 'ยอดขาย', 'ต่อหัว', 'จาน/รอบ', 'จ่ายแทน'],
+      tKeys.slice(0, 25).map(k => {
+        const o = byT[k];
+        return [esc(k), o.n, o.guests || '–', baht(o.rev), o.guests ? baht(o.rev / o.guests) : '–',
+          num1(o.qty / (o.n || 1)), o.merged ? (o.merged + ' ครั้ง') : '–'];
+      }), { num: [1, 2, 3, 4, 5, 6] }));
+  }
+  if (mergedBills) {
+    const mg = B.filter(b => (b.segments || []).length > 1);
+    h.push('<h3 style="margin-top:22px">บิลที่รวมจ่าย</h3>');
+    h.push(tbl(['เลขที่บิล', 'วัน', 'จ่ายที่โต๊ะ', 'รวมโต๊ะ', 'ยอดรวม', 'พนักงาน'],
+      mg.map(b => [esc(b.billNo || '–'), b.date, esc(b.table),
+        esc((b.segments || []).map(x => x.table + ' (' + baht(Number(x.amount) || 0) + ')').join(' + ')),
+        baht(b.total), esc(b.staff || '–')], ), { num: [4] }));
+  }
+
+  /* ---- ช่องทางการจ่ายเงิน ---- */
+  const mix = {};
+  B.forEach(b => { mix[b.method] = (mix[b.method] || 0) + b.total; });
+  const mixRows = Object.keys(mix).sort((a, c) => mix[c] - mix[a]).map(k =>
+    [k, baht(mix[k]), (Math.round(mix[k] / rev * 1000) / 10) + '%', bar(mix[k], rev)]);
+  h.push('<h3 style="margin-top:22px">ช่องทางการจ่ายเงิน</h3>');
+  h.push(tbl(['วิธีจ่าย', 'ยอด', 'สัดส่วน', ''], mixRows, { num: [1, 2] }));
+
+  /* ---- รายวัน ---- */
+  const maxRev = Math.max.apply(null, dayKeys.map(d => days[d].rev));
+  const dayRows = dayKeys.map(d => {
+    const x = days[d];
+    return [d, x.bills, (x.seats || x.bills), baht(x.rev), baht(x.rev / x.bills), x.guests || '–',
+      x.guests ? baht(x.rev / x.guests) : '–', bar(x.rev, maxRev)];
+  });
+  h.push('<h3 style="margin-top:22px">ยอดขายรายวัน (จากบิลจริง)</h3>');
+  h.push(tbl(['วัน', 'บิล', 'โต๊ะ', 'ยอดขาย', 'เฉลี่ย/บิล', 'ลูกค้า (คน)', 'ต่อหัว', ''], dayRows, { num: [1, 2, 3, 4, 5, 6] }));
+
+  /* ---- ช่วงเวลาเก็บเงิน ---- */
+  const hh = {};
+  B.forEach(b => { if (b.closedAt) { const k = b.closedAt.getHours(); hh[k] = (hh[k] || 0) + b.total; } });
+  const hhKeys = Object.keys(hh).map(Number).sort((a, c) => a - c);
+  if (hhKeys.length) {
+    const mx = Math.max.apply(null, hhKeys.map(k => hh[k]));
+    h.push('<h3 style="margin-top:22px">เงินเข้าตามช่วงเวลาปิดบิล</h3>');
+    h.push('<p class="hint">ช่วงเวลานี้คือเวลาเก็บเงินจริง แม่นกว่าการเดาจากเวลาสั่งอาหาร</p>');
+    h.push(tbl(['ชั่วโมง', 'ยอด', 'สัดส่วน', ''],
+      hhKeys.map(k => [hhLabel(k), baht(hh[k]), (Math.round(hh[k] / rev * 1000) / 10) + '%', bar(hh[k], mx)]), { num: [1, 2] }));
+  }
+
+  /* ---- รายพนักงาน ---- */
+  const st = {};
+  B.forEach(b => { const k = b.staff || '–'; const x = st[k] = st[k] || { rev: 0, n: 0, disc: 0 }; x.rev += b.total; x.n++; x.disc += b.discount; });
+  const stKeys = Object.keys(st).sort((a, c) => st[c].rev - st[a].rev);
+  if (stKeys.length > 1 || stKeys[0] !== '–') {
+    h.push('<h3 style="margin-top:22px">แยกตามพนักงานที่เก็บเงิน</h3>');
+    h.push(tbl(['พนักงาน', 'บิล', 'ยอดรวม', 'เฉลี่ย/บิล', 'ส่วนลดที่กด'],
+      stKeys.map(k => [esc(k), st[k].n, baht(st[k].rev), baht(st[k].rev / st[k].n), baht(st[k].disc)]), { num: [1, 2, 3, 4] }));
+  }
+
+  /* ---- สินค้าขายดีตามบิล ---- */
+  const it = {};
+  B.forEach(b => b.items.forEach(x => {
+    if (!x) return;
+    const nm = String(x.name || '–');
+    const q = Number(x.qty) || 0, pr = Number(x.price) || 0;
+    const e = it[nm] = it[nm] || { qty: 0, rev: 0 };
+    e.qty += q; e.rev += q * pr;
+  }));
+  const itKeys = Object.keys(it).sort((a, c) => it[c].rev - it[a].rev);
+  if (itKeys.length) {
+    const mx = it[itKeys[0]].rev;
+    h.push('<h3 style="margin-top:22px">รายการที่ทำเงิน (ตามกลุ่มราคาที่แคชเชียร์กด)</h3>');
+    h.push(tbl(['รายการ', 'จำนวน', 'ยอดเงิน', 'สัดส่วน', ''],
+      itKeys.map(k => [esc(k), it[k].qty, baht(it[k].rev), (Math.round(it[k].rev / rev * 1000) / 10) + '%', bar(it[k].rev, mx)]), { num: [1, 2, 3] }));
+  }
+
+  /* ---- เทียบกับบัญชี ---- */
+  if (FIN && FIN.loaded) {
+    const fd = FIN.daily || {};
+    const rows = dayKeys.map(d => {
+      const f = fd[d] || {};
+      const book = (Number(f.cash) || 0) + (Number(f.transfer) || 0) + (Number(f.halfhalf) || 0);
+      const gap = book - days[d].rev;
+      return [d, baht(days[d].rev), book ? baht(book) : '–',
+        book ? ((gap >= 0 ? '+' : '') + baht(gap)) : '–',
+        book ? ((Math.round(Math.abs(gap) / days[d].rev * 1000) / 10) + '%') : '–'];
+    });
+    h.push('<h3 style="margin-top:22px">เครื่องเก็บเงิน × ที่กรอกในบัญชี</h3>');
+    h.push('<p class="hint">ถ้าสองตัวนี้ห่างกันเกิน 5% บ่อยๆ แปลว่ากรอกบัญชีไม่ตรง หรือเก็บเงินนอกระบบ</p>');
+    h.push(tbl(['วัน', 'เครื่องเก็บเงิน', 'บัญชีกรอกเอง', 'ส่วนต่าง', '%'], rows, { num: [1, 2, 3, 4] }));
+  }
+
+  h.push('<h3 style="margin-top:22px">บิลล่าสุด 50 บิล</h3>');
+  h.push(tbl(['เลขที่บิล', 'วัน', 'โต๊ะ', 'คน', 'จาน', 'นาที', 'ยอด', 'จ่าย', 'พนักงาน'],
+    B.slice(-50).reverse().map(b => [esc(b.billNo || '–'), b.date, esc(b.table), b.guests || '–', b.qty,
+      b.minutes || '–', baht(b.total), esc(b.method), esc(b.staff)]), { num: [3, 4, 5, 6] }));
+
+  box.innerHTML = h.join('');
+}
+
+/* ============ จำนวนคนต่อโต๊ะ (guestCounts) ============ */
+let GUESTS = { byDate: {}, total: 0, records: 0, loaded: false };
+const DINE_LABEL = 'ทานที่ร้าน';
+
+async function loadGuests() {
+  GUESTS = { byDate: {}, total: 0, records: 0, loaded: false };
+  if (!db || DEMO) return;
+  try {
+    const dFrom = isoLocal(RANGE.from), dTo = isoLocal(RANGE.to);
+    const snap = await db.ref(BASE_PATH + 'guestCounts').orderByKey().startAt(dFrom).endAt(dTo).once('value');
+    const v = snap.val() || {};
+    Object.keys(v).forEach(d => {
+      const tables = v[d] || {};
+      let sum = 0, cnt = 0;
+      Object.keys(tables).forEach(k => {
+        const rec = tables[k];
+        if (rec == null) return;
+        if (typeof rec === 'number') { if (rec > 0) { sum += rec; cnt++; } return; }
+        if (rec.count != null) {                       // รูปแบบเก่า: 1 โต๊ะ = 1 รอบ/วัน
+          const c = Number(rec.count) || 0;
+          if (c > 0) { sum += c; cnt++; }
+          return;
+        }
+        Object.keys(rec).forEach(sid => {              // รูปแบบใหม่: หลายรอบต่อโต๊ะต่อวัน
+          const sr = rec[sid];
+          const c = Number(sr && sr.count) || 0;
+          if (c > 0) { sum += c; cnt++; }
+        });
+      });
+      if (cnt) { GUESTS.byDate[d] = { guests: sum, tables: cnt }; GUESTS.total += sum; GUESTS.records += cnt; }
+    });
+    GUESTS.loaded = true;
+  } catch (e) { console.warn('guests', e); }
+}
+
+function renderGuestSection(t) {
+  const dineBills = BILLS.filter(b => b.channel === DINE_LABEL);
+  let dineRev = 0;
+  dineBills.forEach(b => { dineRev += b.rev; });
+  let allRev = 0;
+  BILLS.forEach(b => { allRev += b.rev; });
+
+  let h = '<h3>5. ลูกค้า &amp; ยอดต่อหัว (Spend per Head)</h3>';
+  if (!GUESTS.total) {
+    return h + '<div class="empty">ยังไม่มีการกรอกจำนวนคนในช่วงนี้ — ที่เครื่องรับออเดอร์ หลังส่งออเดอร์โต๊ะทานที่ร้าน จะมีหน้าถาม “กี่คน” ขึ้นมา กดเลขเดียวจบ</div>';
+  }
+
+  const spend = dineRev > 0 ? dineRev / GUESTS.total : null;
+  const avgGroup = GUESTS.records ? GUESTS.total / GUESTS.records : null;
+  const coverage = dineBills.length ? (GUESTS.records / dineBills.length * 100) : null;
+  const dineShare = allRev > 0 ? dineRev / allRev : 0;
+  const profitHead = (t && GUESTS.total) ? (t.profit * dineShare) / GUESTS.total : null;
+  const days = Object.keys(GUESTS.byDate).length;
+
+  h += '<div class="fin-t">' +
+    finTile('ลูกค้ารวม', GUESTS.total.toLocaleString() + ' คน', days + ' วันที่มีข้อมูล · เฉลี่ย ' + (days ? num1(GUESTS.total / days) : '0') + ' คน/วัน', '') +
+    finTile('ยอดต่อหัว', spend == null ? '–' : baht(spend), 'เฉพาะทานที่ร้าน', '') +
+    finTile('กำไรสุทธิต่อหัว', profitHead == null ? '–' : baht(profitHead), 'ปันส่วนกำไรตามสัดส่วนยอดทานที่ร้าน', (profitHead != null && profitHead >= 0) ? 'fin-pos' : 'fin-neg') +
+    finTile('ขนาดกลุ่มเฉลี่ย', avgGroup == null ? '–' : num1(avgGroup) + ' คน/รอบ', 'กรอกแล้ว ' + GUESTS.records + ' รอบ (นั่งโต๊ะ)', '') +
+    '</div>';
+
+  if (coverage != null) {
+    const cls = coverage < 50 ? 'note warn' : 'note';
+    h += '<div class="' + cls + '">ความครอบคลุมข้อมูล: มีจำนวนคนครบ <b>' + num1(coverage) + '%</b> ของบิลทานที่ร้าน' +
+      (coverage < 50 ? ' — ตัวเลขยอดต่อหัวยังเชื่อไม่ได้เต็มที่ กรอกให้ครบขึ้นก่อน' : ' — เชื่อถือได้ดี') + '</div>';
+  }
+
+  // ตารางรายวัน
+  const ser = dailySeries();
+  const revByDate = {};
+  BILLS.forEach(b => {
+    if (b.channel !== DINE_LABEL) return;
+    const d = isoLocal(b.start);
+    revByDate[d] = (revByDate[d] || 0) + b.rev;
+  });
+  const dts = Object.keys(GUESTS.byDate).sort();
+  if (dts.length) {
+    h += '<table class="bm"><tr><th>วัน</th><th class="r">ลูกค้า</th><th class="r">รอบที่กรอก</th><th class="r">คน/รอบ</th><th class="r">ยอดทานที่ร้าน</th><th class="r">ยอด/หัว</th></tr>';
+    dts.forEach(d => {
+      const g = GUESTS.byDate[d];
+      const rv = revByDate[d] || 0;
+      h += '<tr><td>' + d + '</td><td class="r">' + g.guests + '</td><td class="r">' + g.tables + '</td>' +
+        '<td class="r">' + num1(g.guests / g.tables) + '</td><td class="r">' + baht(rv) + '</td>' +
+        '<td class="r"><b>' + (g.guests > 0 && rv > 0 ? baht(rv / g.guests) : '–') + '</b></td></tr>';
+    });
+    h += '</table>';
+  }
+  h += '<p class="hint">ยอดต่อหัวคือตัววัดการเชียร์ขายที่แม่นกว่ายอดต่อบิล · ขึ้น 10% โดยไม่ต้องเพิ่มลูกค้า = กำไรเพิ่มเกือบทั้งหมดเพราะไม่มีต้นทุนหาลูกค้าเพิ่ม</p>';
+  return h;
+}
+
+function renderRecon() {
+  const box = document.getElementById('reconBody');
+  if (!box) return;
+  if (DEMO) { box.innerHTML = '<div class="empty">โหมดตัวอย่างไม่มีข้อมูลบัญชีจริง</div>'; return; }
+  if (FIN.error) { box.innerHTML = '<div class="note warn">ดึงข้อมูลบัญชีไม่สำเร็จ: ' + esc(FIN.error) + '</div>'; return; }
+  const t = finTotals();
+  if (!t.days.length) { box.innerHTML = '<div class="empty">ช่วงที่เลือกยังไม่มีการบันทึกบัญชี</div>'; return; }
+
+  const series = dailySeries();
+  const byDate = {}; series.forEach(d => { byDate[d.date] = d; });
+  const h = [];
+
+  // 1) กระทบยอดขาย
+  let ordRev = 0, accNet = 0, cmpDays = 0, qtySum = 0;
+  const rowsHtml = [];
+  t.days.forEach(d => {
+    const o = byDate[d.date];
+    if (!o || (o.rev <= 0 && d.net <= 0)) return;
+    cmpDays++; ordRev += o.rev; accNet += d.net; qtySum += o.qty;
+    const diff = d.net - o.rev;
+    const dp = o.rev > 0 ? (diff / o.rev * 100) : null;
+    const bad = (dp != null && Math.abs(dp) > 10);
+    rowsHtml.push('<tr><td>' + d.date + (o.snapOnly ? ' <span class="hint">(บีบอัด)</span>' : '') + '</td>' +
+      '<td class="r">' + baht(o.rev) + '</td><td class="r">' + baht(d.net) + '</td>' +
+      '<td class="r" style="color:' + (bad ? '#C1533A' : '#8a857c') + '"><b>' + (diff >= 0 ? '+' : '') + baht(diff) + '</b></td>' +
+      '<td class="r">' + (dp == null ? '–' : (dp >= 0 ? '+' : '') + num1(dp) + '%') + '</td></tr>');
+  });
+  const gap = accNet - ordRev;
+  const gapPct = ordRev > 0 ? (gap / ordRev * 100) : null;
+  h.push('<h3>1. ยอดขายจากออเดอร์ เทียบ เงินที่จดจริง</h3>' +
+    '<div class="fin-t">' +
+    finTile('จากระบบออเดอร์', baht(ordRev), 'raw × ราคาเมนู · ' + cmpDays + ' วัน', '') +
+    finTile('จากการจดบัญชี', baht(accNet), 'ยอดขายสุทธิ', '') +
+    finTile('ส่วนต่าง', (gap >= 0 ? '+' : '') + baht(gap), gapPct == null ? '' : num1(gapPct) + '% ของยอดออเดอร์', (gapPct != null && Math.abs(gapPct) > 5) ? 'fin-neg' : '') +
+    '</div>');
+  if (gapPct != null) {
+    let msg;
+    if (Math.abs(gapPct) <= 5) msg = '<div class="note">✅ สองระบบตรงกันในเกณฑ์ปกติ (±5%) — การจดออเดอร์กับการรับเงินสอดคล้องกัน</div>';
+    else if (gapPct < 0) msg = '<div class="note warn">⚠️ เงินจริง<b>น้อยกว่า</b>ยอดออเดอร์ ' + baht(Math.abs(gap)) + ' (' + num1(Math.abs(gapPct)) + '%) — สาเหตุที่เป็นไปได้: คิดเงินขาด / ลดราคาแล้วไม่ได้แก้ในระบบ / ราคาเมนูในระบบสูงเกินจริง / เงินหาย</div>';
+    else msg = '<div class="note warn">⚠️ เงินจริง<b>มากกว่า</b>ยอดออเดอร์ ' + baht(gap) + ' (' + num1(gapPct) + '%) — มักแปลว่า: มีการขายที่ไม่ได้จดลงระบบออเดอร์ / เมนูบางตัวยังไม่ได้ตั้งราคา / นับเงินทอนเกิน</div>';
+    h.push(msg);
+  }
+  if (rowsHtml.length) {
+    h.push('<table class="bm"><tr><th>วัน</th><th class="r">ออเดอร์</th><th class="r">บัญชี</th><th class="r">ต่าง</th><th class="r">%</th></tr>' + rowsHtml.join('') + '</table>');
+  }
+
+  // 2) food cost จริง vs ทฤษฎี
+  const agg = menuAgg();
+  let theoCost = 0, theoRev = 0, costedRev = 0;
+  Object.keys(agg).forEach(k => {
+    theoRev += agg[k].rev;
+    if (costOf(k) > 0) { theoCost += agg[k].cost; costedRev += agg[k].rev; }
+  });
+  const coverage = theoRev > 0 ? costedRev / theoRev * 100 : 0;
+  const theoPct = costedRev > 0 ? (theoCost / costedRev * 100) : null;
+  const actualPct = fpct(t.foodCost, t.net);
+  let fc = '<h3>2. Food Cost จริง เทียบ ที่ควรจะเป็น</h3>';
+  if (theoPct == null) {
+    fc += '<div class="empty">ยังเทียบไม่ได้ — ไปกรอกต้นทุนต่อจานที่แท็บ “ตั้งต้นทุน” ก่อน อย่างน้อย 20 เมนูขายดี</div>';
+  } else {
+    const gapp = (actualPct != null) ? (actualPct - theoPct) : null;
+    const leak = (gapp != null && t.net > 0) ? (gapp / 100 * t.net) : null;
+    fc += '<div class="fin-t">' +
+      finTile('Food Cost ที่ควรเป็น (ทฤษฎี)', num1(theoPct) + '%', 'จากต้นทุนต่อจานที่กรอกไว้', '') +
+      finTile('Food Cost จริง', actualPct == null ? '–' : num1(actualPct) + '%', 'เงินซื้อของจริง ÷ ยอดขาย', '') +
+      finTile('ส่วนต่าง (รอยรั่ว)', gapp == null ? '–' : (gapp >= 0 ? '+' : '') + num1(gapp) + ' จุด', leak == null ? '' : '≈ ' + baht(Math.abs(leak)) + ' ในช่วงนี้', (gapp != null && gapp > 3) ? 'fin-neg' : 'fin-pos') +
+      finTile('ความครอบคลุมต้นทุน', num1(coverage) + '%', 'ของยอดขายที่มีต้นทุนกรอกไว้', coverage < 60 ? 'fin-neg' : '') +
+      '</div>';
+    if (coverage < 60) fc += '<div class="note warn">กรอกต้นทุนเมนูไว้เพียง ' + num1(coverage) + '% ของยอดขาย — ตัวเลขทฤษฎียังไม่น่าเชื่อถือ</div>';
+    else if (gapp != null && gapp > 3) fc += '<div class="note warn">ซื้อของแพงกว่าสูตรอยู่ ' + num1(gapp) + ' จุด ≈ <b>' + baht(Math.abs(leak)) + '</b> — สาเหตุปกติ: ตักเกินสูตร · ของเสีย/หมดอายุ · ของขึ้นราคาแต่ยังไม่ได้อัปต้นทุน · ของหาย · สต็อกเกินช่วงสิ้นเดือน</div>';
+    else fc += '<div class="note">✅ ซื้อของใกล้เคียงกับสูตร — การควบคุมของอยู่ในเกณฑ์</div>';
+  }
+  h.push(fc);
+
+  // 3) ต้นทุนต่อจาน / กำไรต่อจาน
+  let qty = 0, bills = 0;
+  series.forEach(d => { qty += d.qty; bills += d.bills; });
+  let pj = '<h3>3. ต้นทุนและกำไรต่อจาน / ต่อบิล</h3>';
+  if (qty > 0) {
+    pj += '<div class="fin-t">' +
+      finTile('กำไรสุทธิต่อจาน', baht(t.profit / qty), 'จาก ' + qty.toLocaleString() + ' จาน', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
+      finTile('ต้นทุนค่าแรงต่อจาน', baht(t.labor / qty), 'ยิ่งต่ำยิ่งคุ้ม', '') +
+      finTile('ต้นทุนวัตถุดิบต่อจาน', baht(t.foodCost / qty), 'เงินซื้อจริง ÷ จำนวนจาน', '') +
+      finTile('กำไรสุทธิต่อบิล', bills ? baht(t.profit / bills) : '–', bills ? bills.toLocaleString() + ' บิล' : '', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
+      '</div><p class="hint">ใช้ดูว่าการเพิ่มคน/เพิ่มรอบขายคุ้มไหม · ถ้าต้นทุนแรงต่อจานสูง แปลว่าคนมากเกินเมื่อเทียบกับงาน</p>';
+  } else {
+    pj += '<div class="empty">ช่วงนี้ไม่มีข้อมูลรายจาน</div>';
+  }
+  h.push(pj);
+
+  h.push(renderGuestSection(t));
+
+  // 4) ช่องทางเงิน
+  const payTot = t.cash + t.transfer + t.half;
+  if (payTot > 0) {
+    h.push('<h3>6. สัดส่วนการรับชำระ (จากบัญชี)</h3><table class="bm">' +
+      '<tr><th>ช่องทาง</th><th class="r">บาท</th><th class="r">%</th></tr>' +
+      '<tr><td>เงินสด</td><td class="r">' + baht(t.cash) + '</td><td class="r">' + fpctTxt(t.cash, payTot) + '</td></tr>' +
+      '<tr><td>เงินโอน</td><td class="r">' + baht(t.transfer) + '</td><td class="r">' + fpctTxt(t.transfer, payTot) + '</td></tr>' +
+      '<tr><td>คนละครึ่ง/โครงการรัฐ</td><td class="r">' + baht(t.half) + '</td><td class="r">' + fpctTxt(t.half, payTot) + '</td></tr>' +
+      '</table>');
+  }
+
+  box.innerHTML = h.join('');
+}
+
+/* ============ render ============ */
+function renderAll() {
+  renderMeta(); renderKpis(); renderTrend(); renderHeat(); renderDow(); renderDaypart();
+  renderMenu(); renderKitchen(); renderChannel(); renderBasket(); renderCost();
+  renderInsights();
+  renderFinance(); renderRecon(); renderPos();
+}
+
+
+/* ============ ระบบวิเคราะห์อัตโนมัติ (Insight Engine) ============ */
+const DOW_TH = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์'];
+const SEV_META = {
+  crit: ['ins-crit', 'sev-crit', 'เร่งด่วน'],
+  warn: ['ins-warn', 'sev-warn', 'ควรแก้'],
+  good: ['ins-good', 'sev-good', 'จุดแข็ง'],
+  info: ['ins-info', 'sev-info', 'ข้อสังเกต']
+};
+const SEV_ORDER = { crit: 0, warn: 1, info: 2, good: 3 };
+
+function insCard(f) {
+  const m = SEV_META[f.sev] || SEV_META.info;
+  return '<div class="ins ' + m[0] + '">' +
+    '<h4><span class="sev ' + m[1] + '">' + m[2] + '</span>' + f.title + '</h4>' +
+    '<div class="ev">' + f.ev + '</div>' +
+    '<div class="act"><b>สิ่งที่ควรทำ:</b> ' + f.act + '</div></div>';
+}
+function hhLabel(h) { return pad2(h) + ':00'; }
+
+function renderInsights() {
+  const box = document.getElementById('insightList');
+  const exec = document.getElementById('execSummary');
+  if (!box) return;
+
+  const series = dailySeries();
+  const days = series.length || 1;
+  const rev = series.reduce((s, d) => s + d.rev, 0);
+  const plates = RAW.reduce((s, r) => s + r.qty, 0);
+  const bills = BILLS.length;
+  const aov = bills ? rev / bills : 0;
+  const ipb = bills ? plates / bills : 0;
+  const F = [];
+
+  if (!RAW.length) {
+    exec.innerHTML = '<div class="exec"><h2>สรุปผู้บริหาร</h2><p>ช่วงที่เลือกยังไม่มีข้อมูลรายจาน — ลองขยายช่วงวัน หรือเปิดด้วย <code>?demo=1</code> เพื่อดูตัวอย่าง</p></div>';
+    box.innerHTML = '<div class="empty">ยังวิเคราะห์ไม่ได้</div>';
+    return;
+  }
+
+  /* ---------- 1. ทิศทางยอดขาย: คนน้อยลง หรือ จ่ายน้อยลง ---------- */
+  const half = Math.floor(series.length / 2);
+  const A = series.slice(0, half), B = series.slice(half);
+  const sum = (arr, k) => arr.reduce((s, d) => s + d[k], 0);
+  const pctChg = (a, b) => (a > 0 ? (b - a) / a * 100 : null);
+  const dRev = pctChg(sum(A, 'rev'), sum(B, 'rev'));
+  const dBill = pctChg(sum(A, 'bills'), sum(B, 'bills'));
+  const aovA = sum(A, 'bills') ? sum(A, 'rev') / sum(A, 'bills') : 0;
+  const aovB = sum(B, 'bills') ? sum(B, 'rev') / sum(B, 'bills') : 0;
+  const dAov = pctChg(aovA, aovB);
+
+  if (dRev != null && series.length >= 6) {
+    let diag, act, sev;
+    if (dRev <= -8) {
+      sev = 'crit';
+      if (dBill != null && dBill <= -5 && (dAov == null || dAov > -3)) {
+        diag = 'สาเหตุคือ <b>คนน้อยลง</b> (บิล ' + num1(dBill) + '%) ไม่ใช่เพราะลูกค้าสั่งน้อยลง';
+        act = 'นี่คือปัญหาการตลาด ไม่ใช่เมนู — เร่งทำโปรดึงคนกลับ (รีวิว/แจกคูปอง/ยิงแอดรัศมีในรัศมี 3 กม.) และตรวจว่ามีคู่แข่งเปิดใหม่แถวๆ หรือไม่';
+      } else if (dAov != null && dAov <= -5) {
+        diag = 'สาเหตุคือ <b>ลูกค้าจ่ายต่อบิลน้อยลง</b> (AOV ' + num1(dAov) + '%) คนยังเข้าเท่าเดิม';
+        act = 'นี่คือปัญหาหน้าร้าน — ฝึกพนักงานเชียร์ของเคียง/เครื่องดื่ม จัดเซ็ตราคาคุ้ม และทบทวนว่าลดราคาหรือลดปริมาณไปหรือเปล่า';
+      } else {
+        diag = 'ยอดขายหดตัวจากทั้งจำนวนลูกค้าและยอดต่อบิล';
+        act = 'ตรวจสองเรื่องเร่งด่วน: คุณภาพอาหาร/ความเร็วบริการ และคู่แข่งในพื้นที่';
+      }
+      F.push({ sev: sev, title: 'ยอดขายกำลังลดลง ' + num1(Math.abs(dRev)) + '%',
+        ev: 'ครึ่งหลังของช่วงทำยอดได้ <b>' + baht(sum(B, 'rev')) + ' ฿</b> เทียบกับครึ่งแรก ' + baht(sum(A, 'rev')) + ' ฿ · จำนวนบิล ' + (dBill == null ? '—' : num1(dBill) + '%') + ' · AOV ' + (dAov == null ? '—' : num1(dAov) + '%') + '<br>' + diag,
+        act: act });
+    } else if (dRev >= 8) {
+      F.push({ sev: 'good', title: 'ยอดขายเติบโต ' + num1(dRev) + '%',
+        ev: 'ครึ่งหลัง <b>' + baht(sum(B, 'rev')) + ' ฿</b> เทียบครึ่งแรก ' + baht(sum(A, 'rev')) + ' ฿ · บิล ' + (dBill == null ? '—' : num1(dBill) + '%') + ' · AOV ' + (dAov == null ? '—' : num1(dAov) + '%'),
+        act: 'บันทึกไว้ว่าช่วงนี้ทำอะไรไปบ้าง (โปร/เมนูใหม่/รีวิว) แล้วทำซ้ำ อย่าเพิ่งของใหม่ทันที เช็คว่าครัวรับไหวไหม' });
+    }
+  }
+
+  /* ---------- 2. จานต่อบิล / บิลจานเดียว ---------- */
+  const solo = BILLS.filter(b => b.qty <= 1).length;
+  const soloPct = bills ? solo / bills * 100 : 0;
+  if (bills >= 20 && (ipb < 1.8 || soloPct > 35)) {
+    F.push({ sev: 'warn', title: 'โอกาสเชียร์ขาย — จานต่อบิลเพียง ' + num1(ipb),
+      ev: 'บิลที่สั่งเพียงจานเดียวมี <b>' + solo.toLocaleString('th-TH') + ' บิล (' + pct(soloPct) + ')</b> · เกณฑ์ร้านอาหารทั่วไปควรอยู่ 2.0–3.5 จาน/บิล<br>ทุก 0.1 จานที่เพิ่มได้คือเงินที่ไม่มีต้นทุนการตลาดเลย',
+      act: 'ตั้งสคริปต์เชียร์ขาย 1 ประโยคให้พนักงานทุกคนพูดเหมือนกัน (เช่น “รับของทานเล่นหรือเพิ่มไข่เจียวไหมคะ”) + จัดเซ็ตจานหลัก+เครื่องดื่มให้ราคาดึงดูด' });
+  }
+
+  /* ---------- 3. ช่วงเวลาขายดี / ช่วงเวลาตาย ---------- */
+  const byHour = {}, byDow = {}, dowDays = {};
+  RAW.forEach(r => {
+    const h = r.ts.getHours(), d = r.ts.getDay();
+    byHour[h] = (byHour[h] || 0) + priceOf(r.item) * r.qty;
+    if (!byHour[h]) byHour[h] = byHour[h] || 0;
+    byDow[d] = (byDow[d] || 0) + priceOf(r.item) * r.qty;
+  });
+  const hourQty = {};
+  RAW.forEach(r => { const h = r.ts.getHours(); hourQty[h] = (hourQty[h] || 0) + r.qty; });
+  series.forEach(d => { const dt = new Date(d.date + 'T12:00:00'); dowDays[dt.getDay()] = (dowDays[dt.getDay()] || 0) + 1; });
+
+  const hours = Object.keys(hourQty).map(Number).sort((a, b) => a - b);
+  if (hours.length >= 3) {
+    const sortedH = hours.slice().sort((a, b) => hourQty[b] - hourQty[a]);
+    const peak = sortedH[0];
+    const totalQ = hours.reduce((s, h) => s + hourQty[h], 0);
+    const peakShare = totalQ ? hourQty[peak] / totalQ * 100 : 0;
+    const openMin = hours[0], openMax = hours[hours.length - 1];
+    const dead = [];
+    for (let h = openMin; h <= openMax; h++) {
+      const q = hourQty[h] || 0;
+      if (q < totalQ / (openMax - openMin + 1) * 0.35) dead.push(h);
+    }
+    F.push({ sev: 'info', title: 'ชั่วโมงทอง คือ ' + hhLabel(peak) + '–' + hhLabel(peak + 1),
+      ev: 'ชั่วโมงนี้ทำยอดได้ <b>' + pct(peakShare) + '</b> ของจานทั้งหมด (' + hourQty[peak].toLocaleString('th-TH') + ' จาน) · 3 อันดับแรก: ' +
+        sortedH.slice(0, 3).map(h => hhLabel(h) + ' (' + hourQty[h] + ')').join(' · '),
+      act: 'จัดกำลังคนและ prep วัตถุดิบให้เสร็จก่อน ' + hhLabel(peak) + ' อย่างน้อย 45 นาที · ห้ามให้วัตถุดิบขาดช่วงนี้เด็ดขาด' });
+    if (dead.length) {
+      F.push({ sev: 'warn', title: 'มีช่วงเวลาเงียบ ' + dead.length + ' ชั่วโมงต่อวัน',
+        ev: 'ช่วง <b>' + dead.map(hhLabel).join(' · ') + '</b> ขายได้ต่ำกว่า 35% ของค่าเฉลี่ยรายชั่วโมง<br>ช่วงนี้คุณจ่ายค่าเช่า ค่าไฟ ค่าแรงเท่าเดิม แต่ไม่มีรายได้มาชดเชย',
+        act: 'ทำโปรเฉพาะช่วงเวลา (Happy Hour) — เช่น ชุดอิ่มราคาพิเศษ หรือ เครื่องดื่มลดครึ่งราคา เฉพาะ ' + hhLabel(dead[0]) + '–' + hhLabel(dead[dead.length - 1] + 1) + ' · หรือเปิดรับเดลิเวอรีเพิ่มช่วงนี้' });
+    }
+  }
+
+  /* ---------- 4. วันที่ขายดี/ขายไม่ดี ---------- */
+  const dowAvg = [];
+  for (let d = 0; d < 7; d++) {
+    if (!dowDays[d]) continue;
+    dowAvg.push({ d: d, avg: (byDow[d] || 0) / dowDays[d] });
+  }
+  if (dowAvg.length >= 5) {
+    dowAvg.sort((a, b) => b.avg - a.avg);
+    const best = dowAvg[0], worst = dowAvg[dowAvg.length - 1];
+    const gap = best.avg > 0 ? (best.avg - worst.avg) / best.avg * 100 : 0;
+    if (gap >= 30) {
+      F.push({ sev: 'warn', title: 'วัน' + DOW_TH[worst.d] + 'คือวันที่อ่อนที่สุด — ต่างจากวัน' + DOW_TH[best.d] + ' ' + pct(gap),
+        ev: 'วัน' + DOW_TH[best.d] + 'เฉลี่ย <b>' + baht(best.avg) + ' ฿/วัน</b> · วัน' + DOW_TH[worst.d] + 'เฉลี่ย <b>' + baht(worst.avg) + ' ฿/วัน</b><br>ค่าคงที่ของร้านเท่ากันทุกวัน แต่รายได้ไม่เท่า',
+        act: 'สร้างเหตุผลเฉพาะวัน' + DOW_TH[worst.d] + ' (เมนูพิเศษประจำวัน / ส่วนลดสมาชิก / จัดโปรคู่กับร้านข้างเคียง) หรือลดกะหนกลง 1 คนในวันนั้น' });
+    } else {
+      F.push({ sev: 'good', title: 'ยอดขายกระจายตัวสม่ำเสมอทั้งสัปดาห์',
+        ev: 'ช่องว่างระหว่างวันดีสุดกับวันแย่สุดเพียง ' + pct(gap) + ' — วางแผนคน/วัตถุดิบได้ง่าย',
+        act: 'คงการจัดกะหนกปัจจุบันไว้ และไปทุ่มทรัพยากรกับการเพิ่ม AOV แทน' });
+    }
+  }
+
+  /* ---------- 5. Pareto / ความเสี่ยงกระจุกตัว / เมนูตาย ---------- */
+  const agg = menuAgg();
+  const items = Object.keys(agg).map(k => ({ item: k, qty: agg[k].qty, rev: agg[k].rev }))
+    .sort((a, b) => b.rev - a.rev);
+  const totalRev = items.reduce((s, i) => s + i.rev, 0);
+  const totalQty = items.reduce((s, i) => s + i.qty, 0);
+
+  if (items.length >= 8 && totalRev > 0) {
+    const n20 = Math.max(1, Math.ceil(items.length * 0.2));
+    const share20 = items.slice(0, n20).reduce((s, i) => s + i.rev, 0) / totalRev * 100;
+    F.push({ sev: 'info', title: 'เมนูเพียง ' + n20 + ' ตัวทำยอดขาย ' + pct(share20),
+      ev: 'จากทั้งหมด ' + items.length + ' เมนู · ตัวทำเงินสูงสุด: ' +
+        items.slice(0, 3).map(i => '<b>' + esc(i.item) + '</b> (' + pct(i.rev / totalRev * 100) + ')').join(' · '),
+      act: 'งบการตลาด รูปถ่าย และการเชียร์ของพนักงาน ควรทุ่มไปที่เมนูกลุ่มนี้ และต้องไม่มีวันที่ของขาดเด็ดขาด' });
+
+    const top1 = items[0];
+    const top1Share = top1.rev / totalRev * 100;
+    if (top1Share >= 25) {
+      F.push({ sev: 'warn', title: 'พึ่งเมนูเดียวมากเกินไป: “' + esc(top1.item) + '”',
+        ev: 'เมนูนี้เมนูเดียวคิดเป็น <b>' + pct(top1Share) + '</b> ของยอดขายทั้งร้าน<br>ถ้าวัตถุดิบขาด ขึ้นราคา หรือแม่ครัวคนที่ทำเมนูนี้ลาออก ยอดขายจะกระทบทันที',
+        act: 'ล็อกสูตรเป็นลายลักษณ์อักษรให้คนอื่นทำแทนได้ · หาซัพพลายเออร์สำรอง · ปั้นเมนูอันดับ 2–3 ให้แข็งขึ้นเป็น “พระรอง”' });
+    }
+
+    const tail = items.filter(i => i.qty <= Math.max(1, totalQty * 0.002));
+    if (tail.length >= 3 && days >= 14) {
+      F.push({ sev: 'warn', title: 'มีเมนูขายไม่ออก ' + tail.length + ' รายการ',
+        ev: 'ใน ' + days + ' วัน เมนูเหล่านี้ขายรวมกันเพียง ' + tail.reduce((s, i) => s + i.qty, 0) + ' จาน<br>ตัวอย่าง: ' + tail.slice(0, 6).map(i => esc(i.item) + ' (' + i.qty + ')').join(' · ') +
+        '<br>เมนูกลุ่มนี้กินที่เก็บ กินของสดที่เสียทิ้ง และทำให้เมนูอ่านยาก',
+        act: 'เลือก 3–5 ตัวที่ต่ำสุดออกก่อน ถ้ายอดขายรวมไม่ตกใน 2 สัปดาห์ ให้ตัดถาวร — เมนูสั้นลงคนสั่งง่ายขึ้นและครัวเร็วขึ้น' });
+    }
+  }
+
+  /* ---------- 6. เมนูที่ยังไม่มีราคา ---------- */
+  const noPrice = items.filter(i => !(priceOf(i.item) > 0));
+  if (noPrice.length) {
+    const lostQty = noPrice.reduce((s, i) => s + i.qty, 0);
+    F.push({ sev: 'crit', title: 'มี ' + noPrice.length + ' เมนูที่ยังไม่ได้ตั้งราคา — ตัวเลขยอดขายต่ำกว่าความจริง',
+      ev: 'เมนูเหล่านี้ขายไปแล้ว <b>' + lostQty.toLocaleString('th-TH') + ' จาน</b> แต่ถูกคิดเป็นราคา 0 บาท<br>ตัวอย่าง: ' + noPrice.slice(0, 6).map(i => esc(i.item)).join(' · '),
+      act: 'เข้าไปตั้งราคาเมนูเหล่านี้ในระบบรับออเดอร์ก่อน แล้วกดโหลดรายงานนี้ใหม่ — ก่อนแก้ข้อนี้ ตัวเลขยอดขายทุกหน้าจะต่ำกว่าความจริง' });
+  }
+
+  /* ---------- 7. สัดส่วนช่องทาง ---------- */
+  if (bills >= 20) {
+    const chRev = {};
+    BILLS.forEach(b => { chRev[b.channel] = (chRev[b.channel] || 0) + b.rev; });
+    const chTotal = Object.values(chRev).reduce((a, b) => a + b, 0);
+    const delRev = DELIVERY.reduce((s, c) => s + (chRev[c] || 0), 0);
+    const delShare = chTotal ? delRev / chTotal * 100 : 0;
+    const fee = delRev * gpRate();
+    if (delShare >= 40) {
+      F.push({ sev: 'crit', title: 'พึ่งเดลิเวอรีมากเกินไป (' + pct(delShare) + ' ของยอด)',
+        ev: 'ยอดผ่านแอป <b>' + baht(delRev) + ' ฿</b> ถูกหักค่าคอมประมาณ <b>' + baht(fee) + ' ฿</b> (ที่ ' + pct(gpRate() * 100) + ')<br>เงินก้อนนี้คือกำไรที่หายไป และคุณไม่ได้เป็นเจ้าของข้อมูลลูกค้าเหล่านั้น',
+        act: 'ตั้งราคาสองชั้น (แอปแพงกว่าหน้าร้าน 10–15%) · ใส่การ์ด/คูปองในกล่องเดลิเวอรีเพื่อดึงลูกค้ามาสั่งตรง · เปิด LINE OA สั่งกลับบ้านเอง' });
+    } else if (delShare > 0) {
+      F.push({ sev: 'info', title: 'สัดส่วนเดลิเวอรี ' + pct(delShare) + ' ของยอดขาย',
+        ev: 'ค่าคอมประมาณ <b>' + baht(fee) + ' ฿</b> ในช่วงนี้ · ระดับที่สมดุลคือ 15–30%',
+        act: 'ใช้เดลิเวอรีเป็น “ช่องทางหาลูกค้าใหม่” แล้วดึงเข้าช่องทางของตัวเอง (ใบเสร็จแนบส่วนลดสั่งตรงครั้งถัดไป)' });
+    }
+  }
+
+  /* ---------- 8. เวลาทำครัว ---------- */
+  const preps = RAW.filter(r => r.prep != null).map(r => r.prep).sort((a, b) => a - b);
+  if (preps.length >= 30) {
+    const p90 = quantile(preps, 0.9), med = quantile(preps, 0.5);
+    const byHourPrep = {};
+    RAW.forEach(r => { if (r.prep == null) return; const h = r.ts.getHours(); (byHourPrep[h] = byHourPrep[h] || []).push(r.prep); });
+    let worstH = null, worstV = 0;
+    Object.keys(byHourPrep).forEach(h => {
+      if (byHourPrep[h].length < 10) return;
+      const v = quantile(byHourPrep[h].slice().sort((a, b) => a - b), 0.9);
+      if (v > worstV) { worstV = v; worstH = Number(h); }
+    });
+    const sev = p90 > 25 ? 'crit' : (p90 > 15 ? 'warn' : 'good');
+    F.push({ sev: sev,
+      title: sev === 'good' ? 'ครัวคุมเวลาได้ดี (P90 ' + num1(p90) + ' นาที)' : 'เวลารออาหารนานเกินมาตรฐาน (P90 ' + num1(p90) + ' นาที)',
+      ev: 'ค่ากลาง ' + num1(med) + ' นาที · ช้าสุดที่ลูกค้า 1 ใน 10 คนเจอ = <b>' + num1(p90) + ' นาที</b> (เกณฑ์ควร &lt; 15 นาที)' +
+        (worstH != null ? '<br>ชั่วโมงที่แย่ที่สุดคือ <b>' + hhLabel(worstH) + '</b> (P90 ' + num1(worstV) + ' นาที)' : ''),
+      act: sev === 'good' ? 'รักษามาตรฐานนี้ไว้ และใช้เป็นจุดขายในการตลาด (“เสิร์ฟไวเฉลี่ย ' + Math.round(med) + ' นาที”)'
+        : 'เพิ่มคนหรือ prep ล่วงหน้าเฉพาะ' + (worstH != null ? 'ช่วง ' + hhLabel(worstH) : 'ช่วงพีค') + ' · ดูแท็บ “ครัว” ว่าเมนูไหนช้าสุด แล้วเจรจาเมนูนั้นก่อน' });
+  }
+
+  /* ---------- 9. คำขอพิเศษ ---------- */
+  const cm = {};
+  RAW.forEach(r => { const c = r.comment.trim(); if (c) cm[c] = (cm[c] || 0) + r.qty; });
+  const cmList = Object.keys(cm).map(k => ({ c: k, n: cm[k] })).sort((a, b) => b.n - a.n);
+  if (cmList.length) {
+    const cmTotal = cmList.reduce((s, i) => s + i.n, 0);
+    const sharePct = plates ? cmTotal / plates * 100 : 0;
+    F.push({ sev: sharePct >= 20 ? 'warn' : 'info',
+      title: 'ลูกค้าขอพิเศษ ' + pct(sharePct) + ' ของจานทั้งหมด',
+      ev: 'คำขอยอดฮิต: ' + cmList.slice(0, 5).map(i => '<b>' + esc(i.c) + '</b> (' + i.n + ')').join(' · ') +
+        '<br>คำขอที่ซ้ำบ่อย = ความต้องการที่เมนูปกติยังตอบไม่ได้',
+      act: 'เอาคำขอ 2–3 อันดับแรกมาทำเป็นเมนูหรือตัวเลือกถาวร จะลดการสื่อสารผิดหน้าครัว และทำครัวเร็วขึ้น' });
+  }
+
+  /* ---------- 10. โต๊ะที่ทำเงินสูง/ต่ำ ---------- */
+  const dineBills = BILLS.filter(b => b.channel === 'ทานที่ร้าน');
+  if (dineBills.length >= 20) {
+    const tb = {};
+    dineBills.forEach(b => { const t = tb[b.table] = tb[b.table] || { rev: 0, n: 0 }; t.rev += b.rev; t.n++; });
+    const tl = Object.keys(tb).map(k => ({ t: k, rev: tb[k].rev, n: tb[k].n, aov: tb[k].rev / tb[k].n }))
+      .filter(x => x.n >= 3).sort((a, b) => b.n - a.n);
+    if (tl.length >= 4) {
+      const busiest = tl.slice(0, 3), quiet = tl.slice(-3);
+      F.push({ sev: 'info', title: 'โต๊ะไม่ได้ถูกใช้เท่ากัน',
+        ev: 'ใช้บ่อยสุด: ' + busiest.map(x => esc(x.t) + ' (' + x.n + ' บิล)').join(' · ') +
+        '<br>ใช้น้อยสุด: ' + quiet.map(x => esc(x.t) + ' (' + x.n + ' บิล)').join(' · ') +
+        '<br>โต๊ะที่ไม่มีคนนั่ง มักอยู่มุมร้อน เสียงดัง ทางเดิน หรือมองเห็นยาก',
+        act: 'สลับจัดโต๊ะใหม่ เพิ่มพัดลม/ร่ม หรือเปลี่ยนโต๊ะเงียบเป็นโซน 2 ที่นั่ง — ที่นั่งที่เสียไปคือยอดขายที่หายไปทุกรอบ' });
+    }
+  }
+
+  /* ---------- 11. คุณภาพข้อมูล ---------- */
+  if (SNAPONLY > 0) {
+    F.push({ sev: 'warn', title: 'มี ' + SNAPONLY + ' วันที่เหลือแต่ยอดสรุป (ข้อมูลถูกบีบอัด)',
+      ev: 'วันเหล่านี้วิเคราะห์รายชั่วโมง รายโต๊ะ และเวลาครัวไม่ได้ จึงทำให้ผลวิเคราะห์บางส่วนต่ำกว่าความจริง',
+      act: 'ต่อไปให้บีบอัดเฉพาะข้อมูลที่เก่ากว่า 60–90 วัน และ Export JSON เก็บไว้ก่อนทุกครั้ง' });
+  }
+  if (days < 14) {
+    F.push({ sev: 'info', title: 'ช่วงข้อมูลสั้นเกินไปสำหรับการตัดสินใจ',
+      ev: 'กำลังดูอยู่เพียง ' + days + ' วัน — ความผันผวนรายวัน (ฝน วันหยุด งานอีเวนต์) จะทำให้สรุปผิดได้ง่าย',
+      act: 'เปลี่ยนช่วงเวลาด้านบนเป็น 30 หรือ 90 วัน ก่อนตัดสินใจเรื่องราคาหรือเมนู' });
+  }
+
+  /* ---------- สรุปผู้บริหาร ---------- */
+  const nCrit = F.filter(f => f.sev === 'crit').length;
+  const nWarn = F.filter(f => f.sev === 'warn').length;
+  let verdict;
+  if (nCrit) verdict = 'มี <b>' + nCrit + ' เรื่องเร่งด่วน</b> ที่กระทบกำไรโดยตรง ควรจัดการภายในสัปดาห์นี้';
+  else if (nWarn) verdict = 'ไม่มีเรื่องเร่งด่วน แต่มี <b>' + nWarn + ' จุดที่เพิ่มกำไรได้</b> เลือกทำ 1 ข้อในสัปดาห์นี้';
+  else verdict = 'ตัวเลขหลักอยู่ในเกณฑ์ที่ดี โฟกัสที่การขยายยอดได้เต็มที่';
+
+  exec.innerHTML = '<div class="exec"><h2>สรุปผู้บริหาร (Executive Summary)</h2>' +
+    '<p><span class="big">' + baht(rev) + ' ฿</span> ใน ' + days + ' วัน · ' + bills.toLocaleString('th-TH') + ' บิล · AOV ' + baht(aov) + ' ฿ · ' + num1(ipb) + ' จาน/บิล' +
+    (dRev == null ? '' : ' · แนวโน้ม ' + (dRev >= 0 ? '▲ ' : '▼ ') + num1(Math.abs(dRev)) + '%') +
+    '<br>' + verdict + '</p></div>';
+
+  F.sort((a, b) => (SEV_ORDER[a.sev] - SEV_ORDER[b.sev]));
+  box.innerHTML = F.length ? F.map(insCard).join('') : '<div class="empty">ไม่พบประเด็นที่ต้องแก้ในช่วงนี้</div>';
+}
+
+function renderMeta() {
+  const plates = RAW.reduce((s, r) => s + r.qty, 0);
+  document.getElementById('metaLine').textContent =
+    isoLocal(RANGE.from) + ' ถึง ' + isoLocal(RANGE.to) + ' · ' +
+    plates.toLocaleString('th-TH') + ' จาน · ' + BILLS.length.toLocaleString('th-TH') + ' บิล' +
+    (DEMO ? ' · ข้อมูลตัวอย่าง' : '');
+
+  const notes = [];
+  if (DEMO) notes.push('<div class="note warn">โหมดตัวอย่าง — ข้อมูลทั้งหมดเป็นข้อมูลสมมติ ไม่ใช่ยอดจริงของร้าน</div>');
+  if (SNAPONLY > 0) notes.push('<div class="note warn">มี ' + SNAPONLY +
+    ' วันที่ถูกบีบอัดแล้ว (เหลือแต่ยอดรวมรายวัน) วันเหล่านั้นจะไม่ปรากฏในรายงานรายชั่วโมง / รายโต๊ะ / เวลาครัว</div>');
+  if (!Object.keys(COSTS).length) notes.push('<div class="note">ยังไม่ได้กรอกต้นทุนวัตถุดิบ — รายงานกำไรจะใช้ราคาขายแทนไปก่อน ไปที่แท็บ “ตั้งต้นทุน” เพื่อให้ตัวเลขกำไรแม่นจริง</div>');
+  document.getElementById('dataNote').innerHTML = notes.join('');
+}
+
+function renderKpis() {
+  const series = dailySeries();
+  const rev = series.reduce((s, d) => s + d.rev, 0);
+  const plates = series.reduce((s, d) => s + d.qty, 0);
+  const bills = BILLS.length;
+  const aov = bills ? rev / bills : 0;
+  const ipb = bills ? RAW.reduce((s, r) => s + r.qty, 0) / bills : 0;
+  const days = series.length || 1;
+  const cost = RAW.reduce((s, r) => s + costOf(r.item) * r.qty, 0);
+  const revRaw = RAW.reduce((s, r) => s + priceOf(r.item) * r.qty, 0);
+  const gpPct = revRaw > 0 && cost > 0 ? (revRaw - cost) / revRaw * 100 : null;
+  let fee = 0;
+  BILLS.forEach(b => { if (DELIVERY.indexOf(b.channel) >= 0) fee += b.rev * gpRate(); });
+
+  const half = Math.floor(series.length / 2);
+  const sum = (arr, k) => arr.reduce((s, d) => s + d[k], 0);
+  const d1 = series.slice(0, half), d2 = series.slice(half);
+  const delta = (k) => {
+    const a = sum(d1, k), b = sum(d2, k);
+    return a > 0 ? (b - a) / a * 100 : null;
+  };
+
+  document.getElementById('kpis').innerHTML =
+    kpi('ยอดขายรวม', baht(rev) + ' ฿', delta('rev')) +
+    kpi('จำนวนบิล', bills.toLocaleString('th-TH')) +
+    kpi('ยอดต่อบิล (AOV)', baht(aov) + ' ฿') +
+    kpi('จานต่อบิล', num1(ipb)) +
+    kpi('ยอดขายเฉลี่ย/วัน', baht(rev / days) + ' ฿') +
+    kpi('จานที่ขายได้', plates.toLocaleString('th-TH'), delta('qty')) +
+    kpi('กำไรขั้นต้น', gpPct == null ? 'ยังไม่มีต้นทุน' : pct(gpPct)) +
+    kpi('ค่าคอมเดลิเวอรี', baht(fee) + ' ฿');
+}
+
+function renderTrend() {
+  const series = dailySeries();
+  const W = 1000, H = 220, P = 6;
+  if (!series.length) { document.getElementById('trendSvg').innerHTML = '<div class="empty">ไม่มีข้อมูล</div>'; return; }
+  const max = Math.max(1, ...series.map(d => d.rev));
+  const x = i => P + i * ((W - P * 2) / Math.max(1, series.length - 1));
+  const y = v => H - P - (v / max) * (H - P * 2);
+  const pts = series.map((d, i) => x(i) + ',' + y(d.rev));
+  const ma = series.map((d, i) => {
+    const s = Math.max(0, i - 6), part = series.slice(s, i + 1);
+    return x(i) + ',' + y(part.reduce((a, b) => a + b.rev, 0) / part.length);
+  });
+  const best = series.reduce((a, b) => (b.rev > a.rev ? b : a), series[0]);
+  document.getElementById('trendSvg').innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="220" preserveAspectRatio="none">' +
+    '<polygon points="' + P + ',' + (H - P) + ' ' + pts.join(' ') + ' ' + (W - P) + ',' + (H - P) + '" fill="#e9f1fc" />' +
+    '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#2f6fd0" stroke-width="2.5" />' +
+    '<polyline points="' + ma.join(' ') + '" fill="none" stroke="#8a8a86" stroke-width="1.6" stroke-dasharray="5 4" />' +
+    '</svg>' +
+    '<div class="axis"><span>' + series[0].date + '</span><span>' + series[series.length - 1].date +
+    ' · สูงสุด ' + baht(best.rev) + ' ฿ (' + best.date + ')</span></div>';
+}
+
+function renderHeat() {
+  const dows = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+  const grid = {}, hours = new Set();
+  RAW.forEach(r => {
+    const h = r.ts.getHours(), d = r.ts.getDay();
+    hours.add(h);
+    grid[h + '_' + d] = (grid[h + '_' + d] || 0) + r.qty;
+  });
+  const hs = Array.from(hours).sort((a, b) => a - b);
+  if (!hs.length) { document.getElementById('heat').innerHTML = '<div class="empty">ไม่มีข้อมูลรายชั่วโมงในช่วงนี้</div>'; return; }
+  const max = Math.max(1, ...Object.values(grid));
+  let h = '<table><thead><tr><th>ชั่วโมง</th>';
+  dows.forEach(d => { h += '<th class="n" style="text-align:center">' + d + '</th>'; });
+  h += '<th class="n">รวม</th></tr></thead><tbody>';
+  hs.forEach(hr => {
+    let row = 0;
+    let cells = '';
+    for (let d = 0; d < 7; d++) {
+      const v = grid[hr + '_' + d] || 0; row += v;
+      const a = v / max;
+      const bg = v === 0 ? '#faf9f7' : 'rgba(47,111,208,' + (0.08 + a * 0.72).toFixed(3) + ')';
+      const col = a > 0.55 ? '#fff' : '#1f1f1e';
+      cells += '<td class="c" style="background:' + bg + ';color:' + col + '">' + (v || '') + '</td>';
+    }
+    h += '<tr><td>' + pad2(hr) + ':00</td>' + cells + '<td class="n"><b>' + row + '</b></td></tr>';
+  });
+  document.getElementById('heat').innerHTML = h + '</tbody></table>';
+}
+
+function renderDow() {
+  const names = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์'];
+  const agg = names.map(() => ({ rev: 0, bills: 0, days: new Set() }));
+  dailySeries().forEach(d => {
+    const dt = new Date(d.date + 'T12:00:00'); const i = dt.getDay();
+    agg[i].rev += d.rev; agg[i].bills += d.bills; agg[i].days.add(d.date);
+  });
+  const perDay = agg.map(a => a.days.size ? a.rev / a.days.size : 0);
+  const max = Math.max(1, ...perDay);
+  const rows = names.map((n, i) => [
+    n, bar(perDay[i], max), baht(perDay[i]) + ' ฿',
+    agg[i].days.size ? num1(agg[i].bills / agg[i].days.size) : '—'
+  ]);
+  document.getElementById('dowTable').innerHTML =
+    tbl(['วัน', '', 'ยอดเฉลี่ย/วัน', 'บิลเฉลี่ย/วัน'], rows, { num: [2, 3] });
+}
+
+function renderDaypart() {
+  const parts = [
+    { n: 'กลางวัน 10–15', f: h => h >= 10 && h < 15 },
+    { n: 'บ่าย 15–17', f: h => h >= 15 && h < 17 },
+    { n: 'เย็น 17–21', f: h => h >= 17 && h < 21 },
+    { n: 'ดึก 21+', f: h => h >= 21 || h < 10 }
+  ];
+  const agg = parts.map(() => ({ rev: 0, qty: 0 }));
+  RAW.forEach(r => {
+    const h = r.ts.getHours();
+    parts.forEach((p, i) => { if (p.f(h)) { agg[i].rev += priceOf(r.item) * r.qty; agg[i].qty += r.qty; } });
+  });
+  const total = agg.reduce((s, a) => s + a.rev, 0) || 1;
+  const max = Math.max(1, ...agg.map(a => a.rev));
+  const rows = parts.map((p, i) => [
+    p.n, bar(agg[i].rev, max), agg[i].qty.toLocaleString('th-TH'),
+    baht(agg[i].rev) + ' ฿', pct(agg[i].rev / total * 100)
+  ]);
+  document.getElementById('daypartTable').innerHTML =
+    tbl(['ช่วงมื้อ', '', 'จาน', 'ยอดขาย', 'สัดส่วน'], rows, { num: [2, 3, 4] });
+}
+
+function renderMenu() {
+  const m = menuAgg();
+  const list = Object.keys(m).map(name => {
+    const a = m[name];
+    const price = a.qty ? a.rev / a.qty : priceOf(name);
+    const cost = a.qty ? a.cost / a.qty : costOf(name);
+    const margin = cost > 0 ? price - cost : price;
+    return { name, qty: a.qty, rev: a.rev, price, cost, margin, marginPct: price ? (price - cost) / price * 100 : 0 };
+  }).sort((a, b) => b.rev - a.rev);
+
+  const total = list.reduce((s, x) => s + x.rev, 0) || 1;
+  const maxRev = list.length ? list[0].rev : 1;
+  let cum = 0;
+  const hasCost = Object.keys(COSTS).length > 0;
+  const rows = list.slice(0, 40).map((x, i) => {
+    cum += x.rev;
+    const cp = cum / total * 100;
+    return [
+      (i + 1) + '. ' + esc(x.name) + (cp <= 80.0001 ? ' <span class="tag t-info">80%</span>' : ''),
+      bar(x.rev, maxRev),
+      x.qty.toLocaleString('th-TH'),
+      baht(x.rev) + ' ฿',
+      pct(x.rev / total * 100),
+      pct(cp),
+      hasCost ? (x.cost > 0 ? pct(x.marginPct) : '<span class="tag t-info">ไม่มีต้นทุน</span>') : '—'
+    ];
+  });
+  document.getElementById('paretoTable').innerHTML =
+    tbl(['เมนู', '', 'จาน', 'ยอดขาย', 'สัดส่วน', 'สะสม', 'อัตรากำไร'], rows, { num: [2, 3, 4, 5, 6] });
+
+  // matrix
+  const sig = list.filter(x => x.qty >= 1);
+  const box = document.getElementById('matrix');
+  if (!sig.length) { box.innerHTML = '<div class="empty">ไม่มีข้อมูล</div>'; }
+  else {
+    const avgQty = sig.reduce((s, x) => s + x.qty, 0) / sig.length;
+    const avgMargin = sig.reduce((s, x) => s + x.margin, 0) / sig.length;
+    const maxQty = Math.max(1, ...sig.map(x => x.qty));
+    const maxMargin = Math.max(1, ...sig.map(x => x.margin));
+    const cls = x => x.qty >= avgQty ? (x.margin >= avgMargin ? 't-star' : 't-plow') : (x.margin >= avgMargin ? 't-puzz' : 't-dog');
+    const col = { 't-star': 'var(--green)', 't-plow': 'var(--blue)', 't-puzz': 'var(--orange)', 't-dog': 'var(--red)' };
+    let h =
+      '<div class="q" style="left:4px;top:4px">ปริศนา — โปรโมต</div>' +
+      '<div class="q" style="right:4px;top:4px;text-align:right">ดาว — ดันต่อ</div>' +
+      '<div class="q" style="left:4px;bottom:4px">สุนัข — ตัดออก</div>' +
+      '<div class="q" style="right:4px;bottom:4px;text-align:right">ม้างาน — ขึ้นราคา</div>' +
+      '<div style="position:absolute;left:' + (avgQty / maxQty * 92 + 4) + '%;top:0;bottom:0;border-left:1px dashed var(--border)"></div>' +
+      '<div style="position:absolute;bottom:' + (avgMargin / maxMargin * 88 + 6) + '%;left:0;right:0;border-top:1px dashed var(--border)"></div>';
+    const placed = [];
+    sig.slice(0, 26).forEach(x => {
+      const L = (x.qty / maxQty * 92 + 4), B = (x.margin / maxMargin * 88 + 6);
+      const c = cls(x);
+      h += '<div class="pt" style="left:' + L + '%;bottom:' + B + '%;background:' + col[c] + '" title="' +
+        esc(x.name) + ' — ' + x.qty + ' จาน · กำไร/จาน ' + baht(x.margin) + ' ฿"></div>';
+      if (!(x.qty >= avgQty * 0.8 || x.margin >= avgMargin * 1.2)) return;
+      const txt = x.name.slice(0, 14);
+      const halfW = Math.max(6, txt.length * 1.5);
+      let lb = 0, ok = false;
+      for (let t = 0; t < 4 && !ok; t++) {
+        const cand = t % 2 === 0 ? B + 5 + Math.floor(t / 2) * 7 : B - 6 - Math.floor(t / 2) * 7;
+        if (cand < 2 || cand > 95) continue;
+        const hit = placed.some(p => Math.abs(p.y - cand) < 4.2 && Math.abs(p.x - L) < (p.w + halfW));
+        if (!hit) { lb = cand; ok = true; }
+      }
+      if (!ok) return;  // ข้ามป้ายที่จะทับกัน (ยังดูชื่อได้จากการชี้จุด/ตารางด้านล่าง)
+      placed.push({ x: L, y: lb, w: halfW });
+      const align = L > 80 ? 'transform:translate(-100%,50%);' : (L < 12 ? 'transform:translate(0,50%);' : '');
+      h += '<div class="lbl" style="left:' + L + '%;bottom:' + lb + '%;' + align + '">' + esc(txt) + '</div>';
+    });
+    box.innerHTML = h;
+  }
+
+  const sold = new Set(Object.keys(m));
+  const dead = MENUS.filter(x => !sold.has(x)).map(x => [esc(x), '<span class="tag t-dog">ไม่ขายเลย</span>']);
+  const low = list.filter(x => x.qty > 0 && x.qty <= 2).map(x => [esc(x.name), '<span class="tag t-puzz">' + x.qty + ' จาน</span>']);
+  document.getElementById('deadTable').innerHTML =
+    tbl(['เมนู', 'สถานะ'], dead.concat(low).slice(0, 25), {});
+
+  const noPrice = list.filter(x => priceOf(x.name) === 0).map(x => [esc(x.name), x.qty.toLocaleString('th-TH')]);
+  document.getElementById('noPriceTable').innerHTML = noPrice.length
+    ? tbl(['เมนู', 'จานที่ขายไป'], noPrice.slice(0, 25), { num: [1] })
+    : '<div class="empty">ตั้งราคาครบทุกเมนูที่ขายในช่วงนี้แล้ว</div>';
+}
+
+function renderKitchen() {
+  const withPrep = RAW.filter(r => r.prep != null);
+  const all = withPrep.map(r => r.prep);
+  document.getElementById('kitchenKpis').innerHTML =
+    kpi('เวลาทำอาหารเฉลี่ย', all.length ? num1(all.reduce((a, b) => a + b, 0) / all.length) + ' นาที' : '—') +
+    kpi('กลางกลุ่ม (P50)', all.length ? num1(quantile(all, .5)) + ' นาที' : '—') +
+    kpi('ช้าสุดที่เจอบ่อย (P90)', all.length ? num1(quantile(all, .9)) + ' นาที' : '—') +
+    kpi('จานที่รอเกิน 20 นาที', all.length ? pct(all.filter(v => v > 20).length / all.length * 100) : '—');
+
+  const byItem = {};
+  withPrep.forEach(r => { (byItem[r.item] = byItem[r.item] || []).push(r.prep); });
+  const items = Object.keys(byItem).map(k => ({
+    name: k, n: byItem[k].length,
+    avg: byItem[k].reduce((a, b) => a + b, 0) / byItem[k].length,
+    p90: quantile(byItem[k], .9)
+  })).filter(x => x.n >= 3).sort((a, b) => b.p90 - a.p90);
+  const maxP90 = Math.max(1, ...items.map(x => x.p90));
+  document.getElementById('prepTable').innerHTML = tbl(
+    ['เมนู', '', 'จาน', 'เฉลี่ย', 'P90', 'ประเมิน'],
+    items.slice(0, 25).map(x => [
+      esc(x.name), bar(x.p90, maxP90, x.p90 > 25 ? 'warn' : (x.p90 > 20 ? 'mid' : '')),
+      x.n.toLocaleString('th-TH'), num1(x.avg) + ' น.', num1(x.p90) + ' น.',
+      x.p90 > 25 ? '<span class="tag t-dog">ช้าเกินไป</span>'
+        : (x.p90 > 20 ? '<span class="tag t-puzz">เฝ้าดู</span>' : '<span class="tag t-star">ปกติ</span>')
+    ]), { num: [2, 3, 4], empty: 'ข้อมูลเวลายังน้อย (ต้องมีอย่างน้อย 3 จานต่อเมนู)' });
+
+  const byHour = {};
+  withPrep.forEach(r => { const h = r.ts.getHours(); (byHour[h] = byHour[h] || []).push(r.prep); });
+  const hrs = Object.keys(byHour).map(Number).sort((a, b) => a - b);
+  const maxH = Math.max(1, ...hrs.map(h => quantile(byHour[h], .9)));
+  document.getElementById('prepByHour').innerHTML = tbl(
+    ['ชั่วโมง', '', 'จาน', 'เฉลี่ย', 'P90'],
+    hrs.map(h => {
+      const v = byHour[h], p90 = quantile(v, .9);
+      return [pad2(h) + ':00', bar(p90, maxH, p90 > 25 ? 'warn' : ''), v.length.toLocaleString('th-TH'),
+        num1(v.reduce((a, b) => a + b, 0) / v.length) + ' น.', num1(p90) + ' น.'];
+    }), { num: [2, 3, 4] });
+
+  const byChef = {};
+  RAW.forEach(r => {
+    const c = chefOf(r.item) || '—';
+    const o = byChef[c] = byChef[c] || { qty: 0, prep: [] };
+    o.qty += r.qty; if (r.prep != null) o.prep.push(r.prep);
+  });
+  const totalQty = Object.values(byChef).reduce((s, o) => s + o.qty, 0) || 1;
+  const maxQ = Math.max(1, ...Object.values(byChef).map(o => o.qty));
+  document.getElementById('chefTable').innerHTML = tbl(
+    ['เชฟ', '', 'จาน', 'สัดส่วนงาน', 'P90'],
+    Object.keys(byChef).sort((a, b) => byChef[b].qty - byChef[a].qty).map(c => {
+      const o = byChef[c];
+      return [esc(CHEF_NAME[c] || c), bar(o.qty, maxQ), o.qty.toLocaleString('th-TH'),
+        pct(o.qty / totalQty * 100), o.prep.length ? num1(quantile(o.prep, .9)) + ' น.' : '—'];
+    }), { num: [2, 3, 4] });
+}
+
+function renderChannel() {
+  const byCh = {};
+  BILLS.forEach(b => {
+    const o = byCh[b.channel] = byCh[b.channel] || { bills: 0, rev: 0, qty: 0 };
+    o.bills++; o.rev += b.rev; o.qty += b.qty;
+  });
+  const total = Object.values(byCh).reduce((s, o) => s + o.rev, 0) || 1;
+  const maxRev = Math.max(1, ...Object.values(byCh).map(o => o.rev));
+  const rows = Object.keys(byCh).sort((a, b) => byCh[b].rev - byCh[a].rev).map(c => {
+    const o = byCh[c], isDel = DELIVERY.indexOf(c) >= 0;
+    const fee = isDel ? o.rev * gpRate() : 0;
+    return [esc(c), bar(o.rev, maxRev), o.bills.toLocaleString('th-TH'), baht(o.rev) + ' ฿',
+      pct(o.rev / total * 100), baht(o.bills ? o.rev / o.bills : 0) + ' ฿',
+      isDel ? '−' + baht(fee) + ' ฿' : '—', baht(o.rev - fee) + ' ฿'];
+  });
+  document.getElementById('channelTable').innerHTML =
+    tbl(['ช่องทาง', '', 'บิล', 'ยอดขาย', 'สัดส่วน', 'ยอด/บิล', 'ค่าคอม', 'เหลือรับจริง'], rows, { num: [2, 3, 4, 5, 6, 7] });
+  document.getElementById('feeBox').innerHTML =
+    'คิดค่าคอมเดลิเวอรีที่ ' + (Number(CFG.gp) || 0) + '% (แกร็บ/ไลน์แมน/ช้อปปี้) — แก้ได้ในแท็บ “ตั้งต้นทุน” · ยอดนี้ยังไม่หักต้นทุนวัตถุดิบ';
+
+  const byTable = {};
+  BILLS.filter(b => b.channel === 'ทานที่ร้าน' || b.channel === 'โต๊ะจอง').forEach(b => {
+    const o = byTable[b.table] = byTable[b.table] || { bills: 0, rev: 0, qty: 0 };
+    o.bills++; o.rev += b.rev; o.qty += b.qty;
+  });
+  document.getElementById('tableTable').innerHTML = tbl(
+    ['โต๊ะ', 'บิล', 'ยอดขาย', 'ยอด/บิล', 'จาน/บิล'],
+    Object.keys(byTable).sort((a, b) => byTable[b].rev - byTable[a].rev).slice(0, 15).map(t => {
+      const o = byTable[t];
+      return [esc(t), o.bills.toLocaleString('th-TH'), baht(o.rev) + ' ฿',
+        baht(o.rev / o.bills) + ' ฿', num1(o.qty / o.bills)];
+    }), { num: [1, 2, 3, 4] });
+
+  const byStaff = {};
+  BILLS.forEach(b => {
+    if (!b.staff) return;
+    const o = byStaff[b.staff] = byStaff[b.staff] || { bills: 0, rev: 0, qty: 0 };
+    o.bills++; o.rev += b.rev; o.qty += b.qty;
+  });
+  document.getElementById('staffTable').innerHTML = tbl(
+    ['พนักงาน', 'บิล', 'ยอดขาย', 'ยอด/บิล', 'จาน/บิล'],
+    Object.keys(byStaff).sort((a, b) => byStaff[b].rev - byStaff[a].rev).map(s => {
+      const o = byStaff[s];
+      return [esc(s), o.bills.toLocaleString('th-TH'), baht(o.rev) + ' ฿',
+        baht(o.rev / o.bills) + ' ฿', num1(o.qty / o.bills)];
+    }), { num: [1, 2, 3, 4], empty: 'ยังไม่มีการบันทึกชื่อพนักงานในออเดอร์' });
+}
+
+function renderBasket() {
+  const nBills = BILLS.length || 1;
+  const single = {}, pairs = {};
+  BILLS.forEach(b => {
+    const uniq = Array.from(new Set(b.items));
+    uniq.forEach(i => { single[i] = (single[i] || 0) + 1; });
+    for (let i = 0; i < uniq.length; i++)
+      for (let j = i + 1; j < uniq.length; j++) {
+        const k = [uniq[i], uniq[j]].sort().join(' + ');
+        pairs[k] = (pairs[k] || 0) + 1;
+      }
+  });
+  const rows = Object.keys(pairs).map(k => {
+    const parts = k.split(' + ');
+    const a = parts[0], b = parts[1];
+    const c = pairs[k];
+    const sup = c / nBills;
+    const lift = (single[a] && single[b]) ? sup / ((single[a] / nBills) * (single[b] / nBills)) : 0;
+    return { k, c, sup, lift };
+  }).filter(r => r.c >= 3).sort((a, b) => b.c - a.c).slice(0, 25);
+  document.getElementById('pairTable').innerHTML = tbl(
+    ['คู่เมนู', 'พบร่วมกัน', 'สัดส่วนบิล', 'Lift', 'อ่านว่า'],
+    rows.map(r => [esc(r.k), r.c.toLocaleString('th-TH'), pct(r.sup * 100), num1(r.lift),
+      r.lift >= 2 ? '<span class="tag t-star">ทำเซ็ตได้เลย</span>'
+        : (r.lift >= 1.5 ? '<span class="tag t-plow">น่าลองเชียร์ขาย</span>'
+          : '<span class="tag t-info">บังเอิญเจอคู่กัน</span>')]),
+    { num: [1, 2, 3], empty: 'ข้อมูลยังน้อยเกินจะหาคู่เมนูได้' });
+
+  const dist = {};
+  BILLS.forEach(b => { const k = b.qty >= 8 ? '8+' : String(b.qty); dist[k] = (dist[k] || 0) + 1; });
+  const keys = Object.keys(dist).sort((a, b) => (a === '8+' ? 99 : +a) - (b === '8+' ? 99 : +b));
+  const maxD = Math.max(1, ...Object.values(dist));
+  document.getElementById('basketDist').innerHTML = tbl(
+    ['ขนาดบิล', '', 'บิล', 'สัดส่วน'],
+    keys.map(k => [k + ' จาน', bar(dist[k], maxD), dist[k].toLocaleString('th-TH'), pct(dist[k] / nBills * 100)]),
+    { num: [2, 3] });
+
+  const cm = {};
+  let plates = 0;
+  RAW.forEach(r => {
+    plates += r.qty;
+    const c = r.comment.trim(); if (!c) return;
+    c.split(/[,\/\s]+/).forEach(w => {
+      const t = w.trim(); if (t.length < 2) return;
+      cm[t] = (cm[t] || 0) + r.qty;
+    });
+  });
+  const cmRows = Object.keys(cm).sort((a, b) => cm[b] - cm[a]).slice(0, 15)
+    .map(k => [esc(k), cm[k].toLocaleString('th-TH'), pct(cm[k] / (plates || 1) * 100)]);
+  document.getElementById('commentTable').innerHTML =
+    tbl(['คำขอพิเศษ', 'ครั้ง', 'สัดส่วนจาน'], cmRows, { num: [1, 2], empty: 'ไม่มีคำขอพิเศษในช่วงนี้' });
+}
+
+/* ============ ต้นทุน ============ */
+function renderCost() {
+  document.getElementById('gpInput').value = Number(CFG.gp) || 0;
+  drawCostTable('');
+}
+function drawCostTable(filter) {
+  const m = menuAgg();
+  const names = Array.from(new Set(Object.keys(m).concat(MENUS)));
+  const list = names.map(n => ({ name: n, qty: m[n] ? m[n].qty : 0 }))
+    .filter(x => !filter || x.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+    .sort((a, b) => b.qty - a.qty).slice(0, 80);
+  const rows = list.map(x => {
+    const p = priceOf(x.name), c = costOf(x.name);
+    const gp = p > 0 && c > 0 ? (p - c) / p * 100 : null;
+    const tag = gp == null ? '<span class="tag t-info">—</span>'
+      : (gp >= 65 ? '<span class="tag t-star">' + pct(gp) + '</span>'
+        : (gp >= 55 ? '<span class="tag t-puzz">' + pct(gp) + '</span>'
+          : '<span class="tag t-dog">' + pct(gp) + '</span>'));
+    return [
+      esc(x.name), x.qty.toLocaleString('th-TH'), p ? baht(p) + ' ฿' : '<span class="tag t-info">ไม่มีราคา</span>',
+      '<input class="costin" type="number" min="0" step="1" data-item="' + esc(x.name) + '" value="' + (c || '') + '" />',
+      tag
+    ];
+  });
+  document.getElementById('costTable').innerHTML =
+    tbl(['เมนู', 'ขายไป (จาน)', 'ราคาขาย', 'ต้นทุน/จาน', 'อัตรากำไร'], rows, { num: [1, 2] });
+}
+async function saveCosts() {
+  const btn = document.getElementById('saveCostBtn');
+  const inputs = document.querySelectorAll('#costTable input[data-item]');
+  const updates = {};
+  inputs.forEach(el => {
+    const item = el.getAttribute('data-item');
+    const v = el.value === '' ? null : Number(el.value);
+    if (v !== null && (!isFinite(v) || v < 0)) return;
+    COSTS[fbSafe(item)] = v === null ? null : v;
+    if (v === null) delete COSTS[fbSafe(item)];
+    updates[fbSafe(item)] = v;
+  });
+  const gp = Number(document.getElementById('gpInput').value);
+  CFG.gp = isFinite(gp) && gp >= 0 ? gp : 30;
+  if (DEMO || !db) { btn.textContent = 'โหมดตัวอย่าง (ไม่บันทึก)'; renderAll(); setTimeout(() => btn.textContent = 'บันทึกต้นทุน', 2000); return; }
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+  try {
+    await db.ref(BASE_PATH + 'menuCost').update(updates);
+    await db.ref(BASE_PATH + 'reportConfig').update({ gp: CFG.gp });
+    buildBills(); renderAll();
+    btn.textContent = 'บันทึกแล้ว ✓';
+  } catch (e) {
+    alert('บันทึกไม่สำเร็จ: ' + (e && e.message ? e.message : e));
+    btn.textContent = 'บันทึกต้นทุน';
+  }
+  btn.disabled = false;
+  setTimeout(() => btn.textContent = 'บันทึกต้นทุน', 2500);
+}
+
+/* ============ CSV ============ */
+function downloadCsv() {
+  const series = dailySeries();
+  const m = menuAgg();
+  let csv = 'ส่วนที่ 1: ยอดรายวัน\nวันที่,ยอดขาย,จาน,บิล,ข้อมูลบีบอัดแล้ว\n';
+  series.forEach(d => { csv += [d.date, Math.round(d.rev), d.qty, d.bills, d.snapOnly ? 'ใช่' : ''].join(',') + '\n'; });
+  csv += '\nส่วนที่ 2: ยอดตามเมนู\nเมนู,จาน,ยอดขาย,ต้นทุนรวม,กำไรขั้นต้น\n';
+  Object.keys(m).sort((a, b) => m[b].rev - m[a].rev).forEach(k => {
+    const a = m[k];
+    csv += ['"' + k.replace(/"/g, '""') + '"', a.qty, Math.round(a.rev), Math.round(a.cost),
+      Math.round(a.rev - a.cost)].join(',') + '\n';
+  });
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'report_' + isoLocal(RANGE.from) + '_' + isoLocal(RANGE.to) + '.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ============ demo data ============ */
+function buildDemo() {
+  const menu = [
+    ['ข้าวผัดหมู', 60, 22], ['ผัดกะเพราหมู', 65, 24], ['ต้มยำกุ้ง', 180, 95], ['ส้มตำไทย', 60, 18],
+    ['ไก่ทอด', 90, 38], ['ข้าวเปล่า', 10, 3], ['ปลาทอดน้ำปลา', 250, 140], ['ผัดผักบุ้ง', 60, 16],
+    ['ยำวุ้นเส้น', 80, 30], ['ไข่เจียว', 40, 12], ['ซุปหน่อไม้', 70, 20], ['หมูกระทะพิเศษ', 320, 190],
+    ['น้ำเปล่า', 15, 5], ['ชาเย็น', 35, 10], ['ข้าวผัดปู', 150, 85]
+  ];
+  PRICES = {}; COSTS = {}; MENUS = menu.map(m => m[0]);
+  menu.forEach(m => { PRICES[m[0]] = m[1]; COSTS[fbSafe(m[0])] = m[2]; });
+  CHEFS = { kik: ['ผัด', 'ข้าว'], jeab: ['ต้ม', 'ซุป', 'ยำ', 'ส้มตำ'], nan: ['ทอด', 'ไข่'], see: ['น้ำ', 'ชา'] };
+  CFG = { gp: 30 };
+  const tables = ['โต๊ะ 1', 'โต๊ะ 2', 'โต๊ะ 3', 'โต๊ะ 5', 'โต๊ะ 8', 'โต๊ะ 12', 'กลับบ้าน', 'แกรป', 'ไลน์แมน', 'ช็อปปี้'];
+  const staff = ['กิ๊ก', 'เจี๊ยบ', 'นัท'];
+  const comments = ['', '', '', 'เผ็ดน้อย', 'เผ็ดมาก', 'ไม่ใส่ผัก', 'พิเศษ'];
+  RAW = []; SNAPS = {};
+  const days = Math.max(1, Math.round((RANGE.to - RANGE.from) / 86400000) + 1);
+  for (let d = 0; d < days; d++) {
+    const day = new Date(RANGE.from); day.setDate(day.getDate() + d); day.setHours(0, 0, 0, 0);
+    const dow = day.getDay();
+    const weight = (dow === 5 || dow === 6) ? 1.5 : (dow === 2 ? 0.75 : 1);
+    const bills = Math.round((8 + Math.random() * 6) * weight);
+    for (let b = 0; b < bills; b++) {
+      const peak = Math.random() < 0.45;
+      const hour = peak ? 11 + Math.floor(Math.random() * 3) : 17 + Math.floor(Math.random() * 5);
+      const start = new Date(day); start.setHours(hour, Math.floor(Math.random() * 60), 0, 0);
+      const table = tables[Math.floor(Math.random() * tables.length)];
+      const who = staff[Math.floor(Math.random() * staff.length)];
+      const n = 1 + Math.floor(Math.random() * 5);
+      const chosen = [];
+      for (let i = 0; i < n; i++) chosen.push(menu[Math.floor(Math.random() * menu.length)][0]);
+      if (chosen.indexOf('ข้าวผัดหมู') >= 0 && Math.random() < 0.7) chosen.push('ข้าวเปล่า');
+      if (chosen.indexOf('ส้มตำไทย') >= 0 && Math.random() < 0.65) chosen.push('ไก่ทอด');
+      chosen.forEach((item, i) => {
+        const ts = new Date(start.getTime() + i * 60000);
+        const base = 10 + Math.random() * 10 + (hour >= 18 && hour <= 19 ? 8 : 0);
+        RAW.push({
+          item, qty: 1, comment: comments[Math.floor(Math.random() * comments.length)],
+          table, staff: who, ts, prep: Math.round(base * 10) / 10
+        });
+      });
+    }
+  }
+}
+
+/* ============ UI ============ */
+document.getElementById('tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tab'); if (!btn) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === btn));
+  const p = btn.getAttribute('data-p');
+  document.querySelectorAll('.panel').forEach(el => el.classList.toggle('hidden', el.id !== 'p-' + p));
+  if (p === 'market') ensureMarket();
+  if (p === 'voids') ensureVoids();
+});
+document.getElementById('rangeSel').addEventListener('change', e => {
+  const custom = e.target.value === 'custom';
+  document.getElementById('dFrom').classList.toggle('hidden', !custom);
+  document.getElementById('dTo').classList.toggle('hidden', !custom);
+  if (custom) {
+    const t = new Date(), f = new Date(); f.setDate(f.getDate() - 29);
+    if (!document.getElementById('dFrom').value) document.getElementById('dFrom').value = isoLocal(f);
+    if (!document.getElementById('dTo').value) document.getElementById('dTo').value = isoLocal(t);
+  } else loadAll();
+});
+document.getElementById('reloadBtn').addEventListener('click', loadAll);
+document.getElementById('csvBtn').addEventListener('click', downloadCsv);
+document.getElementById('saveCostBtn').addEventListener('click', saveCosts);
+document.getElementById('costSearch').addEventListener('input', e => drawCostTable(e.target.value));
+
+loadAll();
+
+
+/* ═════════ [MARKET] วัตถุดิบ จากระบบเดินตลาด ═════════
+   อ่าน waethua_market/sessions (คนละรากกับ racing_order_app)
+   อ่านจาก log.rows ก่อนเสมอ → รอบที่ถูกบีบอัดไปแล้วก็ยังดูได้ครบ */
+const MK_ROOT = 'waethua_market/';
+const MK_DOW = ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+let MK_ROWS = null, MK_LOADED = false, MK_BUSY = false;
+
+function mkDowOf(dateStr){
+  if(!dateStr) return null;
+  const p = String(dateStr).split('-');
+  if(p.length !== 3) return null;
+  const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  return isNaN(d.getTime()) ? null : d.getDay();
+}
+function mkNum(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function mkFmt(n){
+  const x = Math.round(n * 100) / 100;
+  return (Math.abs(x - Math.round(x)) < 1e-9) ? String(Math.round(x)) : x.toFixed(2);
+}
+function mkShortDate(iso){
+  if(!iso) return '-';
+  const p = String(iso).split('-'); if(p.length !== 3) return iso;
+  const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  if(isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+}
+
+function ensureMarket(){
+  if(MK_LOADED || MK_BUSY) return;
+  loadMarket();
+}
+
+async function loadMarket(){
+  if(MK_BUSY) return;
+  MK_BUSY = true;
+  const st = document.getElementById('mkStatus');
+  if(st) st.textContent = 'กำลังโหลด...';
+  try{
+    if(typeof db === 'undefined' || !db) throw new Error('no-db');
+    const snap = await db.ref(MK_ROOT + 'sessions').once('value');
+    const all = snap.val() || {};
+    const rows = [];
+    let sessCount = 0;
+    Object.keys(all).forEach(sid => {
+      const sess = all[sid];
+      if(!sess) return;
+      if(!sess.completed || !sess.shoppingDone || sess.cleared) return;
+      const date = sess.date || (sess.log && sess.log.date) || '';
+      if(!date) return;
+      sessCount++;
+      const dow = (sess.dow != null) ? sess.dow : ((sess.log && sess.log.dow != null) ? sess.log.dow : mkDowOf(date));
+      const logRows = (sess.log && sess.log.rows) ? Object.values(sess.log.rows) : null;
+      if(logRows && logRows.length){
+        logRows.forEach(r => {
+          if(!r) return;
+          rows.push({
+            date: date, dow: dow, sessionId: sid,
+            productId: r.productId || '', name: r.name || '', unit: r.unit || '',
+            qty: mkNum(r.qty), remain: (r.remain == null ? null : mkNum(r.remain)),
+            parUsed: (r.parUsed == null ? null : mkNum(r.parUsed)),
+            shopName: r.shopName || '', empName: r.empName || '',
+            skipped: !!r.skipped, legacy: false
+          });
+        });
+        return;
+      }
+      // รอบเก่าก่อนมีปูม → อ่านจาก entries โดยตรง
+      Object.keys(sess.entries || {}).forEach(eid => {
+        const entry = sess.entries[eid] || {};
+        Object.keys(entry.items || {}).forEach(pid => {
+          const it = entry.items[pid];
+          if(!it) return;
+          rows.push({
+            date: date, dow: dow, sessionId: sid,
+            productId: pid, name: it.name || '', unit: it.unit || '',
+            qty: mkNum(it.qty), remain: (it.remain == null || it.remain === '') ? null : mkNum(it.remain),
+            parUsed: (it.parUsed == null ? null : mkNum(it.parUsed)),
+            shopName: it.shopName || '', empName: '',
+            skipped: !!it.skipped, legacy: true
+          });
+        });
+      });
+    });
+    rows.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    MK_ROWS = rows;
+    MK_LOADED = true;
+    if(st) st.textContent = 'รอบที่ปิดแล้ว ' + sessCount + ' รอบ · ' + rows.length + ' แถว';
+    renderMarket();
+  }catch(err){
+    console.error('loadMarket', err);
+    MK_LOADED = false;
+    const msg = (err && err.code === 'PERMISSION_DENIED')
+      ? 'อ่านข้อมูลไม่ได้ — ต้องเพิ่ม "waethua_market" ใน Firebase Rules ก่อน'
+      : 'โหลดข้อมูลไม่สำเร็จ: ' + (err && err.message ? err.message : err);
+    if(st) st.textContent = '';
+    const body = document.getElementById('mkBody');
+    if(body) body.innerHTML = '<div class="card"><p class="hint">⚠️ ' + esc(msg) + '</p></div>';
+  }finally{
+    MK_BUSY = false;
+  }
+}
+
+function mkFiltered(){
+  const sel = document.getElementById('mkRange');
+  const days = sel ? Number(sel.value) : 90;
+  const rows = MK_ROWS || [];
+  if(!rows.length) return { rows: [], days: days, from: '' };
+  const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (days - 1));
+  const from = isoLocal(d);
+  if(days >= 99999) return { rows: rows.slice(), days: days, from: rows[0].date };
+  return { rows: rows.filter(r => (r.date || '') >= from), days: days, from: from };
+}
+
+function renderMarket(){
+  const body = document.getElementById('mkBody');
+  if(!body) return;
+  const f = mkFiltered();
+  const rows = f.rows;
+  if(!rows.length){
+    body.innerHTML = '<div class="card"><p class="hint">ไม่มีข้อมูลในช่วงนี้ — ลองเลือกช่วงที่ยาวขึ้น หรือตรวจว่าได้กด "ซื้อของเสร็จแล้ว" ในแอปเดินตลาดหรือยัง</p></div>';
+    return;
+  }
+  const bought = rows.filter(r => !r.skipped && r.qty > 0);
+  const sessions = {}; rows.forEach(r => { sessions[r.sessionId] = 1; });
+  const nSess = Object.keys(sessions).length;
+
+  // ── รวมตามสินค้า ──
+  const byProd = {};
+  rows.forEach(r => {
+    const k = r.productId || r.name;
+    if(!k) return;
+    if(!byProd[k]) byProd[k] = { name: r.name, unit: r.unit, qty: 0, times: 0, skips: 0, last: '', shops: {}, remainSum: 0, remainN: 0 };
+    const o = byProd[k];
+    if(r.name) o.name = r.name;
+    if(r.unit) o.unit = r.unit;
+    if(r.skipped){ o.skips++; }
+    else if(r.qty > 0){
+      o.qty += r.qty; o.times++;
+      if((r.date || '') > o.last) o.last = r.date;
+      const sh = r.shopName || 'ไม่ระบุร้าน';
+      o.shops[sh] = (o.shops[sh] || 0) + 1;
+    }
+    if(r.remain != null){ o.remainSum += r.remain; o.remainN++; }
+  });
+  const prodList = Object.keys(byProd).map(k => {
+    const o = byProd[k];
+    const shopTop = Object.keys(o.shops).sort((a, b) => o.shops[b] - o.shops[a])[0] || '-';
+    const nShop = Object.keys(o.shops).length;
+    return {
+      key: k, name: o.name || '(ไม่มีชื่อ)', unit: o.unit || '', qty: o.qty, times: o.times,
+      avg: o.times ? o.qty / o.times : 0, skips: o.skips, last: o.last,
+      shopTop: shopTop, nShop: nShop,
+      avgRemain: o.remainN ? o.remainSum / o.remainN : null
+    };
+  }).sort((a, b) => b.qty - a.qty);
+
+  // ── รวมตามร้าน ──
+  const byShop = {};
+  bought.forEach(r => {
+    const k = r.shopName || 'ไม่ระบุร้าน';
+    if(!byShop[k]) byShop[k] = { lines: 0, prods: {}, visits: {} };
+    byShop[k].lines++;
+    byShop[k].prods[r.productId || r.name] = 1;
+    byShop[k].visits[r.date] = 1;
+  });
+  const shopList = Object.keys(byShop).map(k => ({
+    name: k, lines: byShop[k].lines,
+    prods: Object.keys(byShop[k].prods).length,
+    visits: Object.keys(byShop[k].visits).length
+  })).sort((a, b) => b.lines - a.lines);
+
+  // ── ตามวันในสัปดาห์ ──
+  const byDow = [0, 1, 2, 3, 4, 5, 6].map(() => ({ lines: 0, days: {} }));
+  bought.forEach(r => {
+    const d = (r.dow == null) ? mkDowOf(r.date) : r.dow;
+    if(d == null || d < 0 || d > 6) return;
+    byDow[d].lines++; byDow[d].days[r.date] = 1;
+  });
+  const dowStats = byDow.map((o, i) => {
+    const nd = Object.keys(o.days).length;
+    return { dow: i, lines: o.lines, days: nd, avg: nd ? o.lines / nd : 0 };
+  });
+  const maxDowAvg = Math.max.apply(null, dowStats.map(x => x.avg).concat([0.0001]));
+
+  // ── ต้องดู ──
+  const todayIso = isoLocal(new Date());
+  const daysAgo = iso => {
+    if(!iso) return 9999;
+    const a = new Date(todayIso), b = new Date(iso);
+    return Math.round((a - b) / 86400000);
+  };
+  const watchStale = prodList.filter(p => p.times > 0 && daysAgo(p.last) >= 30)
+    .sort((a, b) => daysAgo(b.last) - daysAgo(a.last)).slice(0, 15);
+  const watchSkip = prodList.filter(p => p.skips >= 3)
+    .sort((a, b) => b.skips - a.skips).slice(0, 15);
+  const watchMulti = prodList.filter(p => p.nShop >= 2)
+    .sort((a, b) => b.nShop - a.nShop).slice(0, 15);
+  const legacyN = rows.filter(r => r.legacy).length;
+
+  const rangeLabel = (f.days >= 99999) ? 'ทั้งหมด' : (f.days + ' วันล่าสุด');
+  let h = '';
+
+  h += '<div class="card" style="margin-top:14px"><h3>ภาพรวม · ' + esc(rangeLabel) + '</h3>'
+     + '<table class="bm"><tr><th>รอบเดินตลาด</th><th>สินค้าที่ซื้อ</th><th>แถวการซื้อ</th><th>ข้ามไม่ซื้อ</th><th>ร้านค้า</th></tr><tr>'
+     + '<td class="r"><b>' + nSess + '</b></td>'
+     + '<td class="r"><b>' + prodList.filter(p => p.times > 0).length + '</b></td>'
+     + '<td class="r"><b>' + bought.length + '</b></td>'
+     + '<td class="r">' + rows.filter(r => r.skipped).length + '</td>'
+     + '<td class="r">' + shopList.length + '</td>'
+     + '</tr></table>';
+  if(legacyN) h += '<p class="hint" style="margin-top:8px">มี ' + legacyN + ' แถวจากรอบเก่าก่อนมีปูม — อาจไม่มีข้อมูลของที่เหลือ/par</p>';
+  h += '</div>';
+
+  // ตารางสินค้า
+  h += '<div class="card" style="margin-top:14px"><h3>ของใช้เยอะน้อยแค่ไหน (เรียงตามจำนวนรวม)</h3>'
+     + '<p class="hint">หน่วยต่างกันเทียบกันตรงๆไม่ได้ (กิโล กับ ถุง) — ให้ดูเปรียบของชนิดเดียวกันข้ามช่วงเวลา</p>'
+     + '<div class="tw"><table class="bm"><thead><tr><th>#</th><th>สินค้า</th><th class="r">รวม</th><th>หน่วย</th><th class="r">ครั้งที่ซื้อ</th><th class="r">เฉลี่ย/ครั้ง</th><th class="r">ข้าม</th><th>ซื้อล่าสุด</th><th>ร้านหลัก</th></tr></thead><tbody>';
+  prodList.slice(0, 60).forEach((p, i) => {
+    h += '<tr><td class="r">' + (i + 1) + '</td><td>' + esc(p.name) + '</td>'
+       + '<td class="r"><b>' + mkFmt(p.qty) + '</b></td><td>' + esc(p.unit) + '</td>'
+       + '<td class="r">' + p.times + '</td><td class="r">' + mkFmt(p.avg) + '</td>'
+       + '<td class="r">' + (p.skips || '-') + '</td>'
+       + '<td>' + esc(mkShortDate(p.last)) + '</td>'
+       + '<td>' + esc(p.shopTop) + (p.nShop > 1 ? ' <span class="hint">+' + (p.nShop - 1) + '</span>' : '') + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if(prodList.length > 60) h += '<p class="hint">แสดง 60 อันดับแรก จากทั้งหมด ' + prodList.length + ' รายการ · โหลด CSV เพื่อดูครบทั้งหมด</p>';
+  h += '</div>';
+
+  // ร้านค้า
+  h += '<div class="card" style="margin-top:14px"><h3>ซื้อจากร้านไหนบ้าง</h3>'
+     + '<table class="bm"><thead><tr><th>ร้าน</th><th class="r">แถวการซื้อ</th><th class="r">ชนิดสินค้า</th><th class="r">จำนวนวันที่ไป</th></tr></thead><tbody>';
+  shopList.forEach(sp => {
+    h += '<tr><td>' + esc(sp.name) + '</td><td class="r">' + sp.lines + '</td><td class="r">' + sp.prods + '</td><td class="r">' + sp.visits + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // วันในสัปดาห์
+  h += '<div class="card" style="margin-top:14px"><h3>ซื้อเยอะวันไหน (เฉลี่ยจำนวนรายการต่อรอบ)</h3>'
+     + '<table class="bm"><thead><tr><th>วัน</th><th class="r">รอบ</th><th class="r">เฉลี่ยรายการ</th><th>สัดส่วน</th></tr></thead><tbody>';
+  [1, 2, 3, 4, 5, 6, 0].forEach(i => {
+    const st = dowStats[i];
+    const pct = Math.round(st.avg / maxDowAvg * 100);
+    h += '<tr><td>' + MK_DOW[i] + '</td><td class="r">' + st.days + '</td><td class="r">' + mkFmt(st.avg) + '</td>'
+       + '<td><div style="background:#e8eaed;border-radius:4px;height:10px;width:100%"><div style="background:#1a73e8;height:10px;border-radius:4px;width:' + pct + '%"></div></div></td></tr>';
+  });
+  h += '</tbody></table><p class="hint">ใช้ดูว่าวันไหนต้องซื้อของหลากหลายกว่าปกติ — เอาไปเทียบกับยอดขายรายวันในแท็บ "ภาพรวม" ได้</p></div>';
+
+  // ต้องดู
+  h += '<div class="card" style="margin-top:14px"><h3>⚠️ ต้องดู</h3>';
+  if(watchStale.length){
+    h += '<h4>สินค้าที่ไม่ได้ซื้อนานกว่า 30 วัน</h4><p class="hint">เลิกขายแล้วใช่ไหม? ถ้าใช่เอาออกจากรายการในแอปเดินตลาดได้เลย จะได้ไม่รก</p>'
+       + '<table class="bm"><thead><tr><th>สินค้า</th><th>ซื้อล่าสุด</th><th class="r">หายไปกี่วัน</th></tr></thead><tbody>';
+    watchStale.forEach(p => {
+      h += '<tr><td>' + esc(p.name) + '</td><td>' + esc(mkShortDate(p.last)) + '</td><td class="r">' + daysAgo(p.last) + '</td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  if(watchSkip.length){
+    h += '<h4 style="margin-top:14px">สินค้าที่โดนกด "ไม่ซื้อ" บ่อย</h4><p class="hint">ของหมดบ่อยหรือร้านไม่มีของ? ควรหาร้านสำรอง</p>'
+       + '<table class="bm"><thead><tr><th>สินค้า</th><th class="r">ครั้งที่ข้าม</th><th class="r">ครั้งที่ซื้อได้</th></tr></thead><tbody>';
+    watchSkip.forEach(p => {
+      h += '<tr><td>' + esc(p.name) + '</td><td class="r">' + p.skips + '</td><td class="r">' + p.times + '</td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  if(watchMulti.length){
+    h += '<h4 style="margin-top:14px">สินค้าที่ซื้อจากหลายร้าน</h4><p class="hint">พอเพิ่มราคาเข้าไปแล้ว กลุ่มนี้จะเทียบได้ทันทีว่าร้านไหนถูกกว่า</p>'
+       + '<table class="bm"><thead><tr><th>สินค้า</th><th class="r">จำนวนร้าน</th><th>ร้านหลัก</th></tr></thead><tbody>';
+    watchMulti.forEach(p => {
+      h += '<tr><td>' + esc(p.name) + '</td><td class="r">' + p.nShop + '</td><td>' + esc(p.shopTop) + '</td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  if(!watchStale.length && !watchSkip.length && !watchMulti.length){
+    h += '<p class="hint">ไม่พบสิ่งผิดปกติในช่วงนี้</p>';
+  }
+  h += '</div>';
+
+  body.innerHTML = h;
+}
+
+function mkDownloadCsv(){
+  const f = mkFiltered();
+  if(!f.rows.length){ alert('ไม่มีข้อมูลให้ดาวน์โหลด'); return; }
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [['วันที่', 'วัน', 'สินค้า', 'หน่วย', 'จำนวน', 'ของที่เหลือ', 'par', 'ร้าน', 'พนักงาน', 'ข้าม'].map(q).join(',')];
+  f.rows.forEach(r => {
+    const d = (r.dow == null) ? mkDowOf(r.date) : r.dow;
+    lines.push([r.date, (d == null ? '' : MK_DOW[d]), r.name, r.unit, r.qty,
+      (r.remain == null ? '' : r.remain), (r.parUsed == null ? '' : r.parUsed),
+      r.shopName, r.empName, (r.skipped ? 'ȗ1' : '')].map(q).join(','));
+  });
+  const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'market-usage-' + isoLocal(new Date()) + '.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+
+(function mkBindControls(){
+  const r = document.getElementById('mkReload');
+  if(r) r.addEventListener('click', () => { MK_LOADED = false; loadMarket(); });
+  const sel = document.getElementById('mkRange');
+  if(sel) sel.addEventListener('change', () => { if(MK_LOADED) renderMarket(); });
+  const c = document.getElementById('mkCsv');
+  if(c) c.addEventListener('click', mkDownloadCsv);
+})();
+
+
+/* ══════ [VOIDS] บิลที่ถูกยกเลิกจากเครื่องเก็บเงิน ══════ */
+let VOIDS = null, VD_LOADED = false, VD_BUSY = false;
+
+function vdDateList(){
+  let to = (RANGE && RANGE.to) ? RANGE.to : isoLocal(new Date());
+  let from = (RANGE && RANGE.from) ? RANGE.from : null;
+  if(!from){ const d = new Date(); d.setDate(d.getDate() - 29); from = isoLocal(d); }
+  const list = [];
+  const a = new Date(from + 'T00:00:00'), b = new Date(to + 'T00:00:00');
+  if(isNaN(a.getTime()) || isNaN(b.getTime())) return { from: from, to: to, list: [] };
+  for(let d = new Date(a); d <= b && list.length < 400; d.setDate(d.getDate() + 1)) list.push(isoLocal(d));
+  return { from: from, to: to, list: list };
+}
+
+function ensureVoids(){ if(VD_LOADED || VD_BUSY) return; loadVoids(); }
+
+async function loadVoids(){
+  if(VD_BUSY) return;
+  VD_BUSY = true;
+  const st = document.getElementById('vdStatus');
+  if(st) st.textContent = 'กำลังโหลด...';
+  try{
+    if(typeof db === 'undefined' || !db) throw new Error('no-db');
+    const d = vdDateList();
+    const snaps = await Promise.all(d.list.map(ds => db.ref(POS_PATH + 'voids/' + ds).once('value')));
+    const out = [];
+    snaps.forEach((sn, i) => {
+      const v = sn.val() || {};
+      Object.keys(v).forEach(k => {
+        const o = v[k] || {};
+        out.push({
+          key: k, date: o.date || d.list[i],
+          table: String(o.table || '-'),
+          guests: Number(o.guests) || 0,
+          openedAt: o.openedAt || '', voidedAt: o.voidedAt || '',
+          minutes: Number(o.minutes) || 0,
+          qty: Number(o.qty) || 0,
+          subtotal: Number(o.subtotal) || 0,
+          staff: (o.staff || '').trim() || '(ไม่ระบุชื่อ)',
+          reason: (o.reason || '').trim(),
+          items: o.items ? Object.values(o.items) : []
+        });
+      });
+    });
+    out.sort((a, b) => String(b.voidedAt || b.date).localeCompare(String(a.voidedAt || a.date)));
+    VOIDS = out;
+    VD_LOADED = true;
+    if(st) st.textContent = d.from + ' → ' + d.to + ' · พบ ' + out.length + ' บิล';
+    renderVoids();
+  }catch(err){
+    console.error('loadVoids', err);
+    VD_LOADED = false;
+    if(st) st.textContent = '';
+    const body = document.getElementById('vdBody');
+    if(body) body.innerHTML = '<div class="card"><p class="hint">⚠️ โหลดข้อมูลไม่สำเร็จ: ' + esc(err && err.message ? err.message : String(err)) + '</p></div>';
+  }finally{
+    VD_BUSY = false;
+  }
+}
+
+function vdHhmm(stamp){
+  if(!stamp) return '-';
+  const m = String(stamp).match(/T(\d{2}):(\d{2})/);
+  return m ? (m[1] + ':' + m[2]) : '-';
+}
+function vdBaht(n){ return '฿' + Math.round(Number(n) || 0).toLocaleString('th-TH'); }
+
+function renderVoids(){
+  const body = document.getElementById('vdBody');
+  if(!body) return;
+  const rows = VOIDS || [];
+  if(!rows.length){
+    body.innerHTML = '<div class="card"><p class="hint">ไม่มีบิลที่ถูกยกเลิกในช่วงนี้ — หรือเครื่องเก็บเงินยังไม่ได้อัพเดตเป็นเวอร์ชันที่บันทึกการยกเลิก</p></div>';
+    return;
+  }
+
+  const totalAmt = rows.reduce((a, r) => a + r.subtotal, 0);
+  const empty = rows.filter(r => r.qty === 0).length;
+  const noReason = rows.filter(r => !r.reason).length;
+
+  /* นับบิลปิดสำเร็จรายคน จาก BILLS ที่หน้านี้โหลดไว้แล้ว → คิดอัตรายกเลิก */
+  const closedBy = {};
+  (typeof BILLS !== 'undefined' && Array.isArray(BILLS) ? BILLS : []).forEach(b => {
+    const k = ((b.staff || '') + '').trim() || '(ไม่ระบุชื่อ)';
+    closedBy[k] = (closedBy[k] || 0) + 1;
+  });
+
+  const byStaff = {};
+  rows.forEach(r => {
+    if(!byStaff[r.staff]) byStaff[r.staff] = { n: 0, amt: 0, empty: 0, noReason: 0, max: 0, days: {} };
+    const o = byStaff[r.staff];
+    o.n++; o.amt += r.subtotal;
+    if(r.qty === 0) o.empty++;
+    if(!r.reason) o.noReason++;
+    if(r.subtotal > o.max) o.max = r.subtotal;
+    o.days[r.date] = 1;
+  });
+  const staffList = Object.keys(byStaff).map(k => {
+    const o = byStaff[k];
+    const closed = closedBy[k] || 0;
+    return {
+      name: k, n: o.n, amt: o.amt, avg: o.n ? o.amt / o.n : 0,
+      max: o.max, empty: o.empty, noReason: o.noReason,
+      days: Object.keys(o.days).length,
+      closed: closed,
+      rate: closed + o.n > 0 ? (o.n / (closed + o.n) * 100) : null
+    };
+  }).sort((a, b) => b.n - a.n);
+
+  let h = '';
+
+  h += '<div class="card" style="margin-top:14px"><h3>สรุปช่วงนี้</h3>'
+     + '<table class="bm"><tr>'
+     + '<th>บิลที่ยกเลิก</th><th>มูลค่ารวม</th><th>เฉลี่ย/บิล</th><th>บิลเปล่า (0 รายการ)</th><th>ไม่ใส่เหตุผล</th></tr><tr>'
+     + '<td class="r"><b>' + rows.length + '</b></td>'
+     + '<td class="r"><b>' + vdBaht(totalAmt) + '</b></td>'
+     + '<td class="r">' + vdBaht(rows.length ? totalAmt / rows.length : 0) + '</td>'
+     + '<td class="r">' + empty + '</td>'
+     + '<td class="r">' + noReason + '</td>'
+     + '</tr></table>'
+     + '<p class="hint" style="margin-top:8px"><b>บิลเปล่า</b> = เปิดโต๊ะแล้วยกเลิกเลย — ปกติไม่น่าห่วง · <b>บิลที่มีมูลค่าสูง</b> = ต้องอธิบายได้</p></div>';
+
+  h += '<div class="card" style="margin-top:14px"><h3>รายพนักงาน</h3>'
+     + '<div class="tw"><table class="bm"><thead><tr><th>พนักงาน</th><th class="r">ยกเลิก</th><th class="r">ปิดบิลสำเร็จ</th><th class="r">% ที่ยกเลิก</th><th class="r">มูลค่ารวม</th><th class="r">บิลใหม่สุด</th><th class="r">บิลเปล่า</th><th class="r">ไม่ใส่เหตุผล</th><th class="r">กี่วัน</th></tr></thead><tbody>';
+  staffList.forEach(p => {
+    const warn = (p.rate != null && p.rate >= 15 && p.n >= 3);
+    h += '<tr' + (warn ? ' style="background:#fdecea"' : '') + '>'
+       + '<td>' + esc(p.name) + (warn ? ' ⚠️' : '') + '</td>'
+       + '<td class="r"><b>' + p.n + '</b></td>'
+       + '<td class="r">' + (p.closed || '-') + '</td>'
+       + '<td class="r">' + (p.rate == null ? '-' : p.rate.toFixed(1) + '%') + '</td>'
+       + '<td class="r">' + vdBaht(p.amt) + '</td>'
+       + '<td class="r">' + vdBaht(p.max) + '</td>'
+       + '<td class="r">' + (p.empty || '-') + '</td>'
+       + '<td class="r">' + (p.noReason || '-') + '</td>'
+       + '<td class="r">' + p.days + '</td></tr>';
+  });
+  h += '</tbody></table></div>'
+     + '<p class="hint">แถบสีแดง = ยกเลิกเกิน 15% ของบิลที่ตัวเองทำ และยกเลิกตั้งแต่ 3 บิลขึ้นไป — ไม่ใช่คำตัดสินว่าโกง แต่คือจุดที่ควรถาม</p></div>';
+
+  h += '<div class="card" style="margin-top:14px"><h3>รายการล่าสุด (สูงสุด 200 บิล)</h3>'
+     + '<div class="tw"><table class="bm"><thead><tr><th>วัน</th><th>เวลายกเลิก</th><th>โต๊ะ</th><th>พนักงาน</th><th class="r">จำนวน</th><th class="r">มูลค่า</th><th class="r">เปิดมากี่นาที</th><th>เหตุผล</th><th>รายการ</th></tr></thead><tbody>';
+  rows.slice(0, 200).forEach(r => {
+    const big = r.subtotal >= 500;
+    const names = r.items.filter(x => x && x.name)
+      .map(x => esc(x.name) + (Number(x.qty) > 1 ? ' ×' + x.qty : '')).join(', ');
+    h += '<tr' + (big ? ' style="background:#fff4e5"' : '') + '>'
+       + '<td>' + esc(r.date) + '</td>'
+       + '<td>' + vdHhmm(r.voidedAt) + '</td>'
+       + '<td>' + esc(r.table) + '</td>'
+       + '<td>' + esc(r.staff) + '</td>'
+       + '<td class="r">' + r.qty + '</td>'
+       + '<td class="r">' + (r.subtotal ? '<b>' + vdBaht(r.subtotal) + '</b>' : '-') + '</td>'
+       + '<td class="r">' + (r.minutes || 0) + '</td>'
+       + '<td>' + (r.reason ? esc(r.reason) : '<span class="hint">—</span>') + '</td>'
+       + '<td class="hint">' + (names || '—') + '</td></tr>';
+  });
+  h += '</tbody></table></div>'
+     + '<p class="hint">แถบสีส้ม = มูลค่าตั้งแต่ 500 บาทขึ้นไป · ถ้าเปิดบิลนานแล้วค่อยยกเลิก (นาทีเยอะ) แล้วมีรายการด้วย คือจุดที่ควรดูที่สุด</p></div>';
+
+  body.innerHTML = h;
+}
+
+function vdCsvDownload(){
+  const rows = VOIDS || [];
+  if(!rows.length){ alert('ไม่มีข้อมูลให้ดาวน์โหลด'); return; }
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const out = [['วัน', 'เวลายกเลิก', 'โต๊ะ', 'พนักงาน', 'จำนวนคน', 'จำนวนรายการ', 'มูลค่า', 'เปิดมากี่นาที', 'เหตุผล', 'รายการ'].map(q).join(',')];
+  rows.forEach(r => {
+    const names = r.items.filter(x => x && x.name).map(x => x.name + ' x' + (x.qty || 0)).join(' | ');
+    out.push([r.date, vdHhmm(r.voidedAt), r.table, r.staff, r.guests, r.qty, r.subtotal, r.minutes, r.reason, names].map(q).join(','));
+  });
+  const blob = new Blob(['\ufeff' + out.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'voided-bills-' + isoLocal(new Date()) + '.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+
+(function vdBind(){
+  const b = document.getElementById('vdReload');
+  if(b) b.addEventListener('click', () => { VD_LOADED = false; loadVoids(); });
+  const c = document.getElementById('vdCsv');
+  if(c) c.addEventListener('click', vdCsvDownload);
+})();
+</script>
+</body>
+</html>
