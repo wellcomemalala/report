@@ -636,6 +636,13 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
+/* บิลที่แยกจ่าย (splitFromTable) โชว์ในรีพอร์ตเป็น "โต๊ะต้นทาง (แยกจ่าย)" แทนชื่อบิลย่อยที่ดูแปลกตา เช่น "5-แยก1" */
+function billTableHtml(x) {
+  return x.splitFromTable ? (esc(x.splitFromTable) + ' <span class="muted" style="font-size:12px">(แยกจ่าย)</span>') : esc(x.table);
+}
+function billTablePlain(x) {
+  return x.splitFromTable ? (x.splitFromTable + ' (แยกจ่าย)') : (x.table || '');
+}
 function fbSafe(s) { return String(s).replace(/[.#$/\[\]]/g, '_'); }
 function baht(n) { return Math.round(n || 0).toLocaleString('th-TH'); }
 function pct(n) { return (Math.round((n || 0) * 10) / 10).toLocaleString('th-TH') + '%'; }
@@ -1135,7 +1142,8 @@ async function loadPos() {
           closedAt: parseTs(b.closedAt),
           items: Array.isArray(b.items) ? b.items : (b.items ? Object.values(b.items) : []),
           mergedFrom: String(b.mergedFrom || ''),
-          segments: Array.isArray(b.segments) ? b.segments : (b.segments ? Object.values(b.segments) : [])
+          segments: Array.isArray(b.segments) ? b.segments : (b.segments ? Object.values(b.segments) : []),
+          splitFromTable: String(b.splitFromTable || '')
         });
       });
     });
@@ -1166,10 +1174,17 @@ function renderPos() {
   const disc = B.reduce((a, b) => a + b.discount, 0);
   const plates = B.reduce((a, b) => a + b.qty, 0);
   const away = B.reduce((a, b) => a + b.awayTotal, 0);
-  /* บิลที่รวมจ่าย = คนละโต๊ะ แค่จ่ายแทนกัน → กางออกเป็นรายโต๊ะก่อนคิดเฉลี่ย */
+  /* บิลที่แยกจ่าย (splitFromTable) = บิลย่อยที่แตกออกจากโต๊ะเดิมเพื่อจ่ายแยกกัน (เช่น คนหนึ่งจ่ายค่าน้ำ อีกคนจ่ายค่าอาหาร)
+     ไม่ใช่โต๊ะใหม่ / บิลใหม่จริงๆ → ไม่นับซ้ำเป็นอีกโต๊ะ/อีกบิลในสถิติ "จำนวนโต๊ะ-บิล / เฉลี่ยต่อบิล / นั่งเฉลี่ย"
+     ส่วนยอดเงิน (rev) ยังรวมของบิลแยกจ่ายครบทุกบาทเหมือนเดิม เพราะเป็นเงินจริงที่เก็บมา */
+  const splitBills = B.filter(b => b.splitFromTable);
+  const mainBills = B.filter(b => !b.splitFromTable);
+  const splitCount = splitBills.length, splitTotal = splitBills.reduce((a, b) => a + b.total, 0);
+  const n = mainBills.length || 1; // ตัวหารของ "เฉลี่ยต่อบิล" ฯลฯ — นับเฉพาะบิลหลักของโต๊ะจริง
+  /* บิลที่รวมจ่าย = คนละโต๊ะ แค่จ่ายแทนกัน → กางออกเป็นรายโต๊ะก่อนคิดเฉลี่ย (ใช้เฉพาะบิลหลัก ไม่รวมบิลแยกจ่าย) */
   const SEATS = [];
   let mergedBills = 0, mergedSeats = 0;
-  B.forEach(b => {
+  mainBills.forEach(b => {
     const sg = (b.segments || []).filter(x => x && x.table);
     if (sg.length > 1) {
       mergedBills++; mergedSeats += sg.length;
@@ -1184,24 +1199,28 @@ function renderPos() {
   const dineB = SEATS.filter(x => posIsDine(x.table) && x.guests > 0);
   const guests = dineB.reduce((a, x) => a + x.guests, 0);
   const dineRev = dineB.reduce((a, x) => a + x.total, 0);
-  const mins = B.filter(b => b.minutes > 0).map(b => b.minutes);
+  const mins = mainBills.filter(b => b.minutes > 0).map(b => b.minutes);
   const avgMin = mins.length ? mins.reduce((a, c) => a + c, 0) / mins.length : 0;
   const days = {};
-  B.forEach(b => { (days[b.date] = days[b.date] || { rev: 0, bills: 0, guests: 0, qty: 0, seats: 0 }); days[b.date].rev += b.total; days[b.date].bills++; days[b.date].guests += b.guests; days[b.date].qty += b.qty; });
+  B.forEach(b => {
+    const dd = (days[b.date] = days[b.date] || { rev: 0, bills: 0, guests: 0, qty: 0, seats: 0 });
+    dd.rev += b.total; dd.qty += b.qty; // ยอดขาย/จำนวนจานรายวัน รวมบิลแยกจ่ายครบทุกบาท
+    if (!b.splitFromTable) { dd.bills++; dd.guests += b.guests; } // จำนวนบิล/ลูกค้า นับเฉพาะบิลหลัก
+  });
   SEATS.forEach(x => { if (days[x.date]) days[x.date].seats++; });
   const dayKeys = Object.keys(days).sort();
   const nDays = dayKeys.length || 1;
 
   const h = [];
   h.push('<div class="fin-t">' +
-    finTile('ยอดเก็บจริง', baht(rev), B.length + ' บิล · ' + nDays + ' วัน', 'fin-pos') +
-    finTile('เฉลี่ยต่อบิล', baht(rev / B.length), 'เฉลี่ย ' + num1(plates / B.length) + ' จาน/บิล', '') +
+    finTile('ยอดเก็บจริง', baht(rev), n + ' บิล · ' + nDays + ' วัน' + (splitCount ? ' · +' + splitCount + ' แยกจ่าย (' + baht(splitTotal) + ')' : ''), 'fin-pos') +
+    finTile('เฉลี่ยต่อบิล', baht(rev / n), 'เฉลี่ย ' + num1(plates / n) + ' จาน/บิล', '') +
     finTile('ยอดต่อหัว', guests ? baht(dineRev / guests) : '–', guests ? (guests.toLocaleString() + ' คน (ทานที่ร้าน)') : 'ยังไม่มีจำนวนคน', '') +
     finTile('เวลานั่งเฉลี่ย', avgMin ? Math.round(avgMin) + ' นาที' : '–', avgMin ? ('รอบโต๊ะประมาณ ' + num1(600 / avgMin) + ' รอบ/โต๊ะ/วัน') : '', '') +
     '</div>');
 
   h.push('<div class="fin-t" style="margin-top:10px">' +
-    finTile('ยอดขายเฉลี่ย/วัน', baht(rev / nDays), num1(B.length / nDays) + ' บิล/วัน', '') +
+    finTile('ยอดขายเฉลี่ย/วัน', baht(rev / nDays), num1(n / nDays) + ' บิล/วัน', '') +
     finTile('ยอดกลับบ้าน (ในบิล)', baht(away), rev ? (Math.round(away / rev * 1000) / 10) + '% ของยอดขาย' : '', '') +
     finTile('ส่วนลดรวม', baht(disc), rev ? (Math.round(disc / (rev + disc) * 1000) / 10) + '% ของยอดเต็ม' : '', disc > 0 ? 'fin-neg' : '') +
     finTile('โต๊ะที่ให้บริการ', SEATS.length.toLocaleString() + ' โต๊ะ', mergedBills ? ('นับแยกโต๊ะแล้ว — มี ' + mergedBills + ' บิลที่จ่ายแทนกัน') : ('เท่ากับจำนวนบิล — ไม่มีการรวมบิล'), '') +
@@ -1243,6 +1262,12 @@ function renderPos() {
   SEATS.filter(x => posIsDine(x.table)).forEach(x => {
     const o = byT[x.table] = byT[x.table] || { n: 0, rev: 0, qty: 0, guests: 0, merged: 0 };
     o.n++; o.rev += x.total; o.qty += x.qty; o.guests += x.guests; if (x.merged) o.merged++;
+  });
+  /* พับยอดบิลที่แยกจ่ายกลับไปรวมกับโต๊ะต้นทาง — ไม่ให้โผล่เป็นแถวใหม่แยกต่างหาก (เช่น "5-แยก1") */
+  splitBills.forEach(b => {
+    if (!posIsDine(b.splitFromTable)) return;
+    const o = byT[b.splitFromTable] = byT[b.splitFromTable] || { n: 0, rev: 0, qty: 0, guests: 0, merged: 0 };
+    o.rev += b.total; o.qty += b.qty;
   });
   const tKeys = Object.keys(byT).sort((a, c) => byT[c].rev - byT[a].rev);
   if (tKeys.length) {
@@ -1339,7 +1364,7 @@ function renderPos() {
 
   h.push('<h3 style="margin-top:22px">บิลล่าสุด 50 บิล</h3>');
   h.push(tbl(['เลขที่บิล', 'วัน', 'โต๊ะ', 'คน', 'จาน', 'นาที', 'ยอด', 'จ่าย', 'พนักงาน'],
-    B.slice(-50).reverse().map(b => [esc(b.billNo || '–'), b.date, esc(b.table), b.guests || '–', b.qty,
+    B.slice(-50).reverse().map(b => [esc(b.billNo || '–'), b.date, billTableHtml(b), b.guests || '–', b.qty,
       b.minutes || '–', baht(b.total), esc(b.method), esc(b.staff)]), { num: [3, 4, 5, 6] }));
 
   box.innerHTML = h.join('');
