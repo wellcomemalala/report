@@ -119,6 +119,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
     </div>
     <div class="controls">
       <select id="rangeSel">
+        <option value="1">วันนี้</option>
         <option value="7">7 วันล่าสุด</option>
         <option value="30" selected>30 วันล่าสุด</option>
         <option value="90">90 วันล่าสุด</option>
@@ -139,7 +140,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
     <button class="tab" data-p="channel">ช่องทาง &amp; โต๊ะ</button>
     <button class="tab" data-p="basket">ตะกร้า &amp; คำขอพิเศษ</button>
     <button class="tab" data-p="finance">💵 การเงิน (P&amp;L)</button>
-    <button class="tab" data-p="pos">🧾 เครื่องเก็บเงิน (เงินจริง)</button>
+    <button class="tab" data-p="pos">🧾 แคชเชียร์ (ยอดขายจริง)</button>
     <button class="tab" data-p="recon">🔍 กระทบยอด</button>
     <button class="tab" data-p="cost">ตั้งต้นทุน</button>
     <button class="tab" data-p="playbook">📈 แผนการตลาด</button>
@@ -166,12 +167,12 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
     <div class="grid g4" id="kpis"></div>
     <div class="card" style="margin-top:18px">
       <h2>แนวโน้มยอดขายรายวัน</h2>
-      <p class="hint">เส้นทึบ = ยอดขายรายวัน · เส้นประ = ค่าเฉลี่ยเคลื่อนที่ 7 วัน (ใช้ดูทิศทางจริง ไม่หลงตามวันเด้ง)</p>
+      <p class="hint">ใช้ยอดจากบิลที่ปิดแล้วในเครื่องแคชเชียร์ · เส้นทึบ = ยอดขายรายวัน · เส้นประ = ค่าเฉลี่ยเคลื่อนที่ 7 วัน</p>
       <div id="trendSvg"></div>
     </div>
     <div class="card">
-      <h2>ช่วงเวลาขายดี</h2>
-      <p class="hint">แถว = ชั่วโมง · คอลัมน์ = วันในสัปดาห์ · ตัวเลข = จำนวนจาน · ยิ่งเข้มยิ่งขายดี</p>
+      <h2>ช่วงเวลาที่ครัวรับออเดอร์</h2>
+      <p class="hint">ใช้เฉพาะเมนูที่ลงระบบออเดอร์ · แถว = ชั่วโมง · คอลัมน์ = วันในสัปดาห์ · ตัวเลข = จำนวนจาน · ยิ่งเข้มยิ่งมีงานครัวมาก</p>
       <div class="heat" id="heat"></div>
     </div>
     <div class="grid g2">
@@ -192,7 +193,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
   <div class="panel hidden" id="p-menu">
     <div class="card">
       <h2>Menu Engineering</h2>
-      <p class="hint">แกนนอน = ความนิยม (จำนวนจาน) · แกนตั้ง = กำไรต่อจาน (ถ้ายังไม่กรอกต้นทุน จะใช้ราคาขายแทน) · เส้นตัด = ค่าเฉลี่ยของร้าน</p>
+      <p class="hint">วิเคราะห์เฉพาะเมนูที่ลงระบบออเดอร์ ไม่รวมอาหารหยิบเองที่ระบุชื่อไม่ได้ · แกนนอน = ความนิยม · แกนตั้ง = กำไรต่อจาน · เมนูที่ยังไม่กรอกต้นทุนจะไม่ถูกจัดกลุ่มกำไร</p>
       <div class="matrix" id="matrix"></div>
       <div class="axis"><span>ขายน้อย</span><span>ขายเยอะ →</span></div>
       <div class="legend">
@@ -247,19 +248,19 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
   <div class="panel hidden" id="p-channel">
     <div class="card">
       <h2>สัดส่วนช่องทางขาย</h2>
-      <p class="hint">เดลิเวอรีมีค่า GP 25–35% ดูยอด “หลังหักค่าคอม” ก่อนตัดสินใจอัดโปร</p>
+      <p class="hint">หน้าร้าน/กลับบ้านใช้ยอดบิลจริงจากแคชเชียร์ · เดลิเวอรีซึ่งไม่ผ่านแคชเชียร์ใช้ยอดประมาณจากระบบออเดอร์</p>
       <div id="channelTable"></div>
       <div class="note" id="feeBox"></div>
     </div>
     <div class="grid g2">
       <div class="card">
         <h2>ผลงานตามโต๊ะ</h2>
-        <p class="hint">โต๊ะที่ยอดต่อบิลต่ำผิดปกติ มักเป็นโต๊ะที่พนักงานเชียร์ขายไม่ถึง</p>
+        <p class="hint">ใช้บิลแคชเชียร์จริง · โต๊ะที่ยอดต่อบิลต่ำผิดปกติอาจเป็นโต๊ะเล็ก ทำเลโต๊ะ หรือโอกาสเชียร์ขาย</p>
         <div id="tableTable"></div>
       </div>
       <div class="card">
         <h2>ผลงานตามพนักงาน</h2>
-        <p class="hint">ยอดต่อบิล = ความสามารถเชียร์ขาย (upsell)</p>
+        <p class="hint">ใช้พนักงานผู้ปิดบิลจากแคชเชียร์ · ยอดต่อบิลเป็นหนึ่งในสัญญาณของการเชียร์ขาย แต่ควรดูขนาดโต๊ะร่วมด้วย</p>
         <div id="staffTable"></div>
       </div>
     </div>
@@ -334,7 +335,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
   <!-- เครื่องเก็บเงิน -->
   <div class="panel hidden" id="p-pos">
     <div class="card">
-      <h2>ยอดเงินจริงจากเครื่องเก็บเงิน</h2>
+      <h2>สรุปยอดขายจริงจากแคชเชียร์</h2>
       <p class="hint">ดึงจากบิลที่ปิดแล้วในเครื่องเก็บเงิน (pos_cashier_v1) — นี่คือเงินที่เก็บได้จริง ไม่ใช่การประมาณจากออเดอร์</p>
       <div id="posBody"></div>
     </div>
@@ -343,8 +344,8 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
   <!-- กระทบยอด -->
   <div class="panel hidden" id="p-recon">
     <div class="card">
-      <h2>กระทบยอด ออเดอร์ × บัญชี</h2>
-      <p class="hint">เอาของสองระบบมชนกัน เพื่อหาเงินรั่ว ของเสีย และต้นทุนที่หายไปโดยไม่รู้ตัว</p>
+      <h2>กระทบยอดเงินจริง แคชเชียร์ × บัญชี</h2>
+      <p class="hint">ตรวจว่ายอดบิลที่ปิดในแคชเชียร์ตรงกับยอดขายสุทธิ (<code>netSales</code>) ที่บันทึกในบัญชีหรือไม่</p>
       <div id="reconBody"></div>
     </div>
   </div>
@@ -532,22 +533,22 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
 
       <h3>5. ข้อจำกัดของข้อมูลชุดนี้</h3>
       <ul>
-        <li><b>ไม่มีจำนวนคนต่อโต๊ะ</b> — จึงคิดยอดต่อหัวไม่ได้ ถ้าอยากได้ ต้องเพิ่มช่องกรอกจำนวนคนตอนเปิดโต๊ะ</li>
+        <li><b>ยอดต่อหัวขึ้นกับการกรอกจำนวนคน</b> — ถ้าบางโต๊ะไม่ได้กรอก รายงานจะแสดงความครอบคลุมและเตือนว่ายังเชื่อถือไม่ได้เต็มที่</li>
         <li><b>ไม่รู้จักลูกค้าเป็นรายคน</b> — ทำการตลาดแบบลูกค้าเก่า/ลูกค้าใหม่ (RFM) ไม่ได้ ต้องมีเบอร์โทรหรือระบบสมาชิกก่อน</li>
         <li><b>ของที่ลูกค้าอยากสั่งแต่หมด ไม่ถูกบันทึก</b> — ยอดที่เสียไปตรงนี้มองไม่เห็น ถ้าอยากรู้ต้องเก็บประวัติตอนกดว่าของหมด</li>
         <li><b>วันที่ถูกกดบีบอัดแล้ว</b> เหลือแต่ยอดรวมรายวัน วิเคราะห์รายชั่วโมง/รายโต๊ะ/เวลาครัวของวันนั้นไม่ได้ — ถ้าจะใช้รายงานนี้จริงจัง ให้บีบอัดเฉพาะข้อมูลที่เก่ากว่า 60–90 วัน</li>
       </ul>
 
       <h3>6. แท็บ การเงิน และ กระทบยอด — ใช้ยังไง</h3>
-      <p>สองแท็บนี้ดึงข้อมูลจากไฟล์ <b>บัญชีร้าน</b> มารวมกับข้อมูลออเดอร์ จึงตอบได้ในสิ่งที่แต่ละระบบตอบเองไม่ได้ · การกรอกบัญชียังทำที่ไฟล์บัญชีร้านเหมือนเดิม ไฟล์นี้แค่มาอ่าน</p>
+      <p>การกระทบเงินจริงใช้ข้อมูลจาก <b>แคชเชียร์และบัญชีร้าน</b> เท่านั้น · ส่วน Food Cost ทฤษฎีจึงค่อยใช้ชื่อเมนูจากระบบออเดอร์เมื่อข้อมูลครอบคลุมเพียงพอ</p>
       <h4>สูตรทุกตัวที่ใช้</h4>
       <div class="kv">
         <b>ยอดขายสุทธิ</b><span>เงินสด + โอน + คนละครึ่ง − เงินทอนตั้งต้น — เป็นตัวตั้งของทุก % ในหน้านี้</span>
         <b>Prime Cost</b><span>วัตถุดิบ + ค่าแรง — ตัวชี้เป็นตายที่สำคัญที่สุดของร้านอาหาร เกิน 65–70% คือสัญญาณอันตราย</span>
         <b>อัตรากำไรส่วนเกิน</b><span>1 − (วัตถุดิบ+ค่าแรง) ÷ ยอดขาย — ขายเพิ่ม 100 บาท เหลือจริงเท่าไรมาจ่ายค่าเช่า/ค่าน้ำค่าไฟ</span>
         <b>จุดคุ้มทุน/วัน</b><span>(ค่าเช่า + จ่ายประจำ) ÷ อัตรากำไรส่วนเกิน ÷ จำนวนวันเปิดร้าน — ตัวเลขที่ควรติดไว้หน้าเค้าเตอร์</span>
-        <b>ส่วนต่างกระทบยอด</b><span>เงินที่จดจริง − ยอดขายที่ระบบออเดอร์คิดได้ — ห่างเกิน ±5% คือต้องหาสาเหตุ</span>
-        <b>Food Cost ส่วนต่าง</b><span>% จริง − % ทฤษฎี — เกิน 3 จุดคือมีการรั่วไหลของจริง</span>
+        <b>ส่วนต่างเงินจริง</b><span><code>netSales</code> ในบัญชี − ยอดบิลแคชเชียร์ — ห่างเกิน ±5% ให้ตรวจเงินทอน ช่องทางชำระ และบิลที่ปิดไม่ครบ</span>
+        <b>Food Cost ส่วนต่าง</b><span>% จริง − % ทฤษฎี — ใช้ได้เมื่อข้อมูลต้นทุนครอบคลุมยอดขายจริงอย่างน้อย 80% และถ้าเกิน 3 จุดให้ตรวจเพิ่มเติม ยังไม่ใช่หลักฐานว่าเกิดการรั่วไหล</span>
       </div>
       <h4>จังหวะการดู</h4>
       <ul>
@@ -563,8 +564,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
         <tr><td>ค่าแรงสูงเกินเกณฑ์</td><td>คนมากเกินในช่วงเงียบ หรือยอดขายตก</td><td>ดูตารางช่วงเวลาขายดี แล้วจัดกะตาใหม่ตามชั่วโมงที่คนแน่น</td></tr>
         <tr><td>กำไรสุทธิต่ำกว่าเกณฑ์</td><td>ราคาขายต่ำเกินไป หรือต้นทุนคงที่หนัก</td><td>ดูแท็บ เมนู &amp; กำไร → ตัดเมนูกลุ่ม “สุนัข” แล้วดัน “ดาว”</td></tr>
         <tr><td>วันขายต่ำกว่าจุดคุ้มทุนหลายวัน</td><td>เปิดร้านวันที่ขาดทุนโดยไม่รู้ตัว</td><td>ลดชั่วโมงเปิด หรือทำโปรเฉพาะวันนั้น</td></tr>
-        <tr><td>ส่วนต่างกระทบยอดติดลบ</td><td>คิดเงินขาด / ลดราคาเอง / เงินขาดมือ</td><td>ไล่ดูเป็นรายวันในตารางกระทบยอด แล้วตรวจกะทิห้องวันนั้น</td></tr>
-        <tr><td>ส่วนต่างเป็นบวกเยอะ</td><td>ขายหน้าร้านโดยไม่จดออเดอร์ / เมนูยังไม่ตั้งราคา</td><td>บังคับให้ทุกออเดอร์ผ่านระบบ · ตั้งราคาเมนูให้ครบ</td></tr>
+        <tr><td>บัญชีต่ำกว่าแคชเชียร์มาก</td><td>กรอกช่องทางรับเงินไม่ครบ · หักเงินทอนผิด · ลืมบันทึกบัญชี</td><td>ไล่ดูรายวัน แล้วเทียบยอดเงินสด/โอน/โครงการรัฐกับรายงานปิดกะ</td></tr>
       </table>
       <p class="hint">ข้อจำกัด: ค่าใช้จ่ายประจำถูกนับตามวันที่จ่ายจริง ถ้าเลือกช่วงสั้นกว่า 1 เดือน % อาจเพี้ยนได้ · แนะนำให้ดูเป็นรายเดือนเต็มเดือน</p>
 
@@ -773,13 +773,11 @@ async function loadAll() {
       else if (kws && typeof kws === 'object') CHEFS[id] = Object.values(kws);
     });
     MENUS = [];
-    MENU_CAT = {};
     const mc = mcSnap.val() || {};
     if (mc.cats) Object.keys(mc.cats).forEach(ck => {
       const c = mc.cats[ck] || {};
-      const cname = String(c.name || c.title || ck || '');
       const items = Array.isArray(c.items) ? c.items : (c.items ? Object.values(c.items) : []);
-      items.forEach(i => { if (i) { MENUS.push(String(i)); MENU_CAT[String(i)] = cname; } });
+      items.forEach(i => { if (i) MENUS.push(String(i)); });
     });
     const cf = cfSnap.val() || {};
     CFG = { gp: cf.gp != null ? Number(cf.gp) : 30 };
@@ -1099,18 +1097,6 @@ function finTile(l, v, s, cls) {
 
 /* ============ เครื่องเก็บเงิน (pos_cashier_v1) ============ */
 const POS_PATH = 'pos_cashier_v1/';
-// ตัดของทอด / ข้าว / ขนม / น้ำ ออกจากการเทียบจำนวนจาน
-let MENU_CAT = {};
-const PLATE_EXCLUDE_RE = /ทอด|ข้าว|ขนม|น้ำ|เครื่องดื่ม|อัดลม|โซดา|เบียร์|เหล้า|สิงห์|ค่ากล่อง|กาแฟ|ชา|โอเลี้ยง/;
-const PLATE_EXCLUDE_LABEL = 'ของทอด · ข้าว · ขนม · น้ำ/เครื่องดื่ม';
-function isCorePlate(name) {
-  const n = String(name || '');
-  if (!n) return false;
-  if (PLATE_EXCLUDE_RE.test(n)) return false;
-  const cat = MENU_CAT[n];
-  if (cat && PLATE_EXCLUDE_RE.test(cat)) return false;
-  return true;
-}
 let POSD = { bills: [], loaded: false, error: '' };
 
 async function loadPos() {
@@ -1139,6 +1125,7 @@ async function loadPos() {
           method: String(b.method || 'เงินสด'),
           staff: String(b.staff || '–'),
           minutes: Number(b.minutes) || 0,
+          openedAt: parseTs(b.openedAt),
           closedAt: parseTs(b.closedAt),
           items: Array.isArray(b.items) ? b.items : (b.items ? Object.values(b.items) : []),
           mergedFrom: String(b.mergedFrom || ''),
@@ -1155,10 +1142,98 @@ async function loadPos() {
   }
 }
 
+/* ยอดขายจริงสำหรับหน้า ภาพรวม/แนวโน้ม/AOV
+   - ยอดเงินรวมบิลแยกจ่ายครบทุกบาท
+   - จำนวนบิลไม่นับบิลแยกจ่ายซ้ำ เพราะยังเป็นลูกค้ากลุ่มเดิม
+   - ถ้ายังไม่มีข้อมูลแคชเชียร์จึงค่อยย้อนกลับไปใช้ค่าประมาณจากออเดอร์ */
+function posMainBills() {
+  return (POSD && Array.isArray(POSD.bills) ? POSD.bills : []).filter(b => !b.splitFromTable);
+}
+function posSalesSeries() {
+  const map = {};
+  (POSD && Array.isArray(POSD.bills) ? POSD.bills : []).forEach(b => {
+    const d = String(b.date || (b.closedAt ? isoLocal(b.closedAt) : ''));
+    if (!d) return;
+    const o = map[d] = map[d] || { date: d, rev: 0, qty: 0, bills: 0, source: 'pos' };
+    o.rev += Number(b.total) || 0;
+    o.qty += Number(b.qty) || 0;
+    if (!b.splitFromTable) o.bills++;
+  });
+  return Object.keys(map).sort().map(d => map[d]);
+}
+function salesSeries() {
+  const p = posSalesSeries();
+  if (p.length) return p;
+  return dailySeries().filter(d => d.rev > 0 || d.qty > 0 || d.bills > 0);
+}
+function salesStats() {
+  const series = salesSeries();
+  const usingPos = posSalesSeries().length > 0;
+  const rev = series.reduce((s, d) => s + d.rev, 0);
+  const qty = usingPos
+    ? (POSD.bills || []).reduce((s, b) => s + (Number(b.qty) || 0), 0)
+    : series.reduce((s, d) => s + d.qty, 0);
+  const bills = usingPos ? posMainBills().length : BILLS.length;
+  return { series, usingPos, rev, qty, bills, activeDays: series.length };
+}
+
+function salesByChannel() {
+  const out = {};
+  if (posSalesSeries().length) {
+    const posChannels = {};
+    (POSD.bills || []).forEach(b => {
+      const c = channelOf(b.splitFromTable || b.table);
+      posChannels[c] = true;
+      const o = out[c] = out[c] || { bills: 0, rev: 0, qty: 0 };
+      o.rev += Number(b.total) || 0;
+      o.qty += Number(b.qty) || 0;
+      if (!b.splitFromTable) o.bills++;
+    });
+    /* เดลิเวอรีไม่ผ่านเครื่องแคชเชียร์ จึงเสริมจากออเดอร์เพื่อไม่ให้ช่องทางหายจากรายงาน */
+    BILLS.filter(b => DELIVERY.indexOf(b.channel) >= 0 && !posChannels[b.channel]).forEach(b => {
+      const o = out[b.channel] = out[b.channel] || { bills: 0, rev: 0, qty: 0 };
+      o.bills++; o.rev += b.rev; o.qty += b.qty;
+    });
+  } else {
+    BILLS.forEach(b => {
+      const o = out[b.channel] = out[b.channel] || { bills: 0, rev: 0, qty: 0 };
+      o.bills++; o.rev += b.rev; o.qty += b.qty;
+    });
+  }
+  return out;
+}
+
+/* จำนวนลูกค้าและยอดทานที่ร้านจากบิลจริง
+   ใช้บิลหลักนับกลุ่มลูกค้า เพื่อไม่ให้บิลแยกจ่ายถูกนับซ้ำ
+   แต่รวมยอด dineTotal จากบิลย่อยด้วย เพื่อให้เงินครบ */
+function posGuestStats() {
+  const all = (POSD && Array.isArray(POSD.bills)) ? POSD.bills : [];
+  const out = { available: all.length > 0, guests: 0, rounds: 0, filledRounds: 0, dineRev: 0, allRev: 0, byDate: {} };
+  all.forEach(b => {
+    const d = String(b.date || (b.closedAt ? isoLocal(b.closedAt) : ''));
+    if (!d) return;
+    const day = out.byDate[d] = out.byDate[d] || { guests: 0, rounds: 0, filledRounds: 0, rev: 0 };
+    const total = Number(b.total) || 0;
+    const dine = Number(b.dineTotal) || 0;
+    out.allRev += total;
+    out.dineRev += dine;
+    day.rev += dine;
+    if (b.splitFromTable) return;
+    if (!posIsDine(b.table) && dine <= 0) return;
+    const g = Number(b.guests) || 0;
+    out.rounds++;
+    day.rounds++;
+    if (g > 0) {
+      out.guests += g;
+      out.filledRounds++;
+      day.guests += g;
+      day.filledRounds++;
+    }
+  });
+  return out;
+}
+
 function posIsDine(t) { return channelOf(t) === DINE_LABEL || channelOf(t) === 'โต๊ะจอง'; }
-// ใช้เฉพาะเช็ค "ลืมลงออเดอร์" — นับทานที่ร้าน + โต๊ะจอง + กลับบ้าน (อาหารออกจากครัวจริง ต้องลงออเดอร์)
-// ไม่นับเดลิเวอรี (แกร็บ/ไลน์แมน/ช้อปปี้) เพราะเงินไม่ได้เก็บผ่านเครื่องนี้ เอามาเทียบจะเพี้ยน
-function posIsDineOrTakeaway(t) { return posIsDine(t) || channelOf(t) === 'กลับบ้าน'; }
 
 function renderPos() {
   const box = document.getElementById('posBody');
@@ -1226,36 +1301,6 @@ function renderPos() {
     finTile('โต๊ะที่ให้บริการ', SEATS.length.toLocaleString() + ' โต๊ะ', mergedBills ? ('นับแยกโต๊ะแล้ว — มี ' + mergedBills + ' บิลที่จ่ายแทนกัน') : ('เท่ากับจำนวนบิล — ไม่มีการรวมบิล'), '') +
     finTile('จำนวนจานที่เก็บเงิน', plates.toLocaleString() + ' จาน', 'นับจากหน้าโต๊ะจริง', '') +
     '</div>');
-
-  /* ---- พนักงานลืมลงออเดอร์กี่ % ---- */
-  let posDinePlates = 0, posSkipped = 0;
-  B.filter(b => posIsDineOrTakeaway(b.table)).forEach(b => {
-    if (b.items && b.items.length) {
-      b.items.forEach(x => {
-        const q = Number(x && x.qty) || 0;
-        if (isCorePlate(x && x.name)) posDinePlates += q; else posSkipped += q;
-      });
-    } else {
-      posDinePlates += b.qty;
-    }
-  });
-  let ordPlates = 0, ordSkipped = 0;
-  RAW.forEach(r => {
-    if (!posIsDineOrTakeaway(r.table)) return;
-    if (isCorePlate(r.item)) ordPlates += r.qty; else ordSkipped += r.qty;
-  });
-  if (posDinePlates > 0 && ordPlates > 0) {
-    const gap = posDinePlates - ordPlates;
-    const gapPct = Math.round(gap / posDinePlates * 1000) / 10;
-    const cls = gapPct >= 10 ? 'warn' : (gapPct <= -10 ? 'warn' : 'ok');
-    h.push('<h3 style="margin-top:22px">พนักงานลืมลงออเดอร์กี่ %</h3>');
-    h.push('<div class="note ' + cls + '">แคชเชียร์นับจานทานที่ร้าน+กลับบ้านได้ <b>' + posDinePlates.toLocaleString() + '</b> จาน · ' +
-      'ระบบออเดอร์มี <b>' + ordPlates.toLocaleString() + '</b> จาน → ต่างกัน <b>' + (gap >= 0 ? '+' : '') + gap.toLocaleString() + ' จาน (' + gapPct + '%)</b><br>' +
-      (gapPct >= 10 ? 'แปลว่ามีอาหารออกจากครัวโดยไม่ได้ลงระบบ — กระทบยอดเมนูและสต็อกจะเพี้ยน' :
-       (gapPct <= -10 ? 'ระบบออเดอร์มากกว่าที่เก็บเงิน — อาจมีการเก็บเงินขาด หรือนับจานตกหล่น' :
-        'ตรงกันในเกณฑ์ที่ยอมรับได้ การลงออเดอร์ถือว่าครบ')) +
-      '<br><span class="hint">นับเฉพาะทานที่ร้าน/โต๊ะจอง/กลับบ้าน — ไม่รวมแกร็บ/ไลน์แมน/ช้อปปี้ (เงินไม่ได้เก็บผ่านเครื่องนี้) · ตัดอาหารประเภท ' + PLATE_EXCLUDE_LABEL + ' ออกทั้งสองฝั่งด้วย (ตัดออก: ฝั่งเก็บเงิน ' + posSkipped.toLocaleString() + ' จาน · ฝั่งออเดอร์ ' + ordSkipped.toLocaleString() + ' จาน)</span></div>');
-  }
 
   /* ---- แยกรายโต๊ะ (บิลที่รวมจ่าย ถูกกระจายกลับเป็นรายโต๊ะแล้ว) ---- */
   const byT = {};
@@ -1346,22 +1391,6 @@ function renderPos() {
       itKeys.map(k => [esc(k), it[k].qty, baht(it[k].rev), (Math.round(it[k].rev / rev * 1000) / 10) + '%', bar(it[k].rev, mx)]), { num: [1, 2, 3] }));
   }
 
-  /* ---- เทียบกับบัญชี ---- */
-  if (FIN && FIN.loaded) {
-    const fd = FIN.daily || {};
-    const rows = dayKeys.map(d => {
-      const f = fd[d] || {};
-      const book = (Number(f.cash) || 0) + (Number(f.transfer) || 0) + (Number(f.halfhalf) || 0);
-      const gap = book - days[d].rev;
-      return [d, baht(days[d].rev), book ? baht(book) : '–',
-        book ? ((gap >= 0 ? '+' : '') + baht(gap)) : '–',
-        book ? ((Math.round(Math.abs(gap) / days[d].rev * 1000) / 10) + '%') : '–'];
-    });
-    h.push('<h3 style="margin-top:22px">เครื่องเก็บเงิน × ที่กรอกในบัญชี</h3>');
-    h.push('<p class="hint">ถ้าสองตัวนี้ห่างกันเกิน 5% บ่อยๆ แปลว่ากรอกบัญชีไม่ตรง หรือเก็บเงินนอกระบบ</p>');
-    h.push(tbl(['วัน', 'เครื่องเก็บเงิน', 'บัญชีกรอกเอง', 'ส่วนต่าง', '%'], rows, { num: [1, 2, 3, 4] }));
-  }
-
   h.push('<h3 style="margin-top:22px">บิลล่าสุด 50 บิล</h3>');
   h.push(tbl(['เลขที่บิล', 'วัน', 'โต๊ะ', 'คน', 'จาน', 'นาที', 'ยอด', 'จ่าย', 'พนักงาน'],
     B.slice(-50).reverse().map(b => [esc(b.billNo || '–'), b.date, billTableHtml(b), b.guests || '–', b.qty,
@@ -1406,29 +1435,53 @@ async function loadGuests() {
 }
 
 function renderGuestSection(t) {
+  let h = '<h3>4. ลูกค้า &amp; ยอดต่อหัว (Spend per Head)</h3>';
+  const ps = posGuestStats();
   const dineBills = BILLS.filter(b => b.channel === DINE_LABEL);
-  let dineRev = 0;
-  dineBills.forEach(b => { dineRev += b.rev; });
-  let allRev = 0;
-  BILLS.forEach(b => { allRev += b.rev; });
-
-  let h = '<h3>5. ลูกค้า &amp; ยอดต่อหัว (Spend per Head)</h3>';
-  if (!GUESTS.total) {
-    return h + '<div class="empty">ยังไม่มีการกรอกจำนวนคนในช่วงนี้ — ที่เครื่องรับออเดอร์ หลังส่งออเดอร์โต๊ะทานที่ร้าน จะมีหน้าถาม “กี่คน” ขึ้นมา กดเลขเดียวจบ</div>';
+  let totalGuests, filledRounds, allRounds, dineRev, allRev, byDate, source;
+  if (ps.available) {
+    totalGuests = ps.guests;
+    filledRounds = ps.filledRounds;
+    allRounds = ps.rounds;
+    dineRev = ps.dineRev;
+    allRev = ps.allRev;
+    byDate = ps.byDate;
+    source = 'แคชเชียร์';
+  } else {
+    totalGuests = GUESTS.total;
+    filledRounds = GUESTS.records;
+    allRounds = dineBills.length;
+    dineRev = dineBills.reduce((s, b) => s + b.rev, 0);
+    allRev = BILLS.reduce((s, b) => s + b.rev, 0);
+    byDate = {};
+    const revByDate = {};
+    dineBills.forEach(b => {
+      const d = isoLocal(b.start);
+      revByDate[d] = (revByDate[d] || 0) + b.rev;
+    });
+    Object.keys(GUESTS.byDate).forEach(d => {
+      const g = GUESTS.byDate[d];
+      byDate[d] = { guests: g.guests, rounds: g.tables, filledRounds: g.tables, rev: revByDate[d] || 0 };
+    });
+    source = 'ระบบออเดอร์';
   }
 
-  const spend = dineRev > 0 ? dineRev / GUESTS.total : null;
-  const avgGroup = GUESTS.records ? GUESTS.total / GUESTS.records : null;
-  const coverage = dineBills.length ? (GUESTS.records / dineBills.length * 100) : null;
+  if (!totalGuests) {
+    return h + '<div class="empty">ยังไม่มีจำนวนลูกค้าในช่วงนี้ — ให้กรอกจำนวนคนตอนเปิดโต๊ะหรือก่อนปิดบิลที่เครื่องแคชเชียร์ เพื่อให้คำนวณยอดต่อหัวได้</div>';
+  }
+
+  const spend = dineRev > 0 ? dineRev / totalGuests : null;
+  const avgGroup = filledRounds ? totalGuests / filledRounds : null;
+  const coverage = allRounds ? (filledRounds / allRounds * 100) : null;
   const dineShare = allRev > 0 ? dineRev / allRev : 0;
-  const profitHead = (t && GUESTS.total) ? (t.profit * dineShare) / GUESTS.total : null;
-  const days = Object.keys(GUESTS.byDate).length;
+  const profitHead = (t && totalGuests) ? (t.profit * dineShare) / totalGuests : null;
+  const days = Object.keys(byDate).filter(d => byDate[d].guests > 0).length;
 
   h += '<div class="fin-t">' +
-    finTile('ลูกค้ารวม', GUESTS.total.toLocaleString() + ' คน', days + ' วันที่มีข้อมูล · เฉลี่ย ' + (days ? num1(GUESTS.total / days) : '0') + ' คน/วัน', '') +
+    finTile('ลูกค้ารวม', totalGuests.toLocaleString() + ' คน', days + ' วันที่มีข้อมูล · เฉลี่ย ' + (days ? num1(totalGuests / days) : '0') + ' คน/วัน', '') +
     finTile('ยอดต่อหัว', spend == null ? '–' : baht(spend), 'เฉพาะทานที่ร้าน', '') +
     finTile('กำไรสุทธิต่อหัว', profitHead == null ? '–' : baht(profitHead), 'ปันส่วนกำไรตามสัดส่วนยอดทานที่ร้าน', (profitHead != null && profitHead >= 0) ? 'fin-pos' : 'fin-neg') +
-    finTile('ขนาดกลุ่มเฉลี่ย', avgGroup == null ? '–' : num1(avgGroup) + ' คน/รอบ', 'กรอกแล้ว ' + GUESTS.records + ' รอบ (นั่งโต๊ะ)', '') +
+    finTile('ขนาดกลุ่มเฉลี่ย', avgGroup == null ? '–' : num1(avgGroup) + ' คน/รอบ', 'กรอกแล้ว ' + filledRounds + ' รอบ · จาก' + source, '') +
     '</div>';
 
   if (coverage != null) {
@@ -1438,21 +1491,14 @@ function renderGuestSection(t) {
   }
 
   // ตารางรายวัน
-  const ser = dailySeries();
-  const revByDate = {};
-  BILLS.forEach(b => {
-    if (b.channel !== DINE_LABEL) return;
-    const d = isoLocal(b.start);
-    revByDate[d] = (revByDate[d] || 0) + b.rev;
-  });
-  const dts = Object.keys(GUESTS.byDate).sort();
+  const dts = Object.keys(byDate).filter(d => byDate[d].guests > 0 || byDate[d].rev > 0).sort();
   if (dts.length) {
     h += '<table class="bm"><tr><th>วัน</th><th class="r">ลูกค้า</th><th class="r">รอบที่กรอก</th><th class="r">คน/รอบ</th><th class="r">ยอดทานที่ร้าน</th><th class="r">ยอด/หัว</th></tr>';
     dts.forEach(d => {
-      const g = GUESTS.byDate[d];
-      const rv = revByDate[d] || 0;
-      h += '<tr><td>' + d + '</td><td class="r">' + g.guests + '</td><td class="r">' + g.tables + '</td>' +
-        '<td class="r">' + num1(g.guests / g.tables) + '</td><td class="r">' + baht(rv) + '</td>' +
+      const g = byDate[d];
+      const rv = g.rev || 0;
+      h += '<tr><td>' + d + '</td><td class="r">' + g.guests + '</td><td class="r">' + g.filledRounds + '</td>' +
+        '<td class="r">' + (g.filledRounds ? num1(g.guests / g.filledRounds) : '–') + '</td><td class="r">' + baht(rv) + '</td>' +
         '<td class="r"><b>' + (g.guests > 0 && rv > 0 ? baht(rv / g.guests) : '–') + '</b></td></tr>';
     });
     h += '</table>';
@@ -1467,83 +1513,95 @@ function renderRecon() {
   if (DEMO) { box.innerHTML = '<div class="empty">โหมดตัวอย่างไม่มีข้อมูลบัญชีจริง</div>'; return; }
   if (FIN.error) { box.innerHTML = '<div class="note warn">ดึงข้อมูลบัญชีไม่สำเร็จ: ' + esc(FIN.error) + '</div>'; return; }
   const t = finTotals();
-  if (!t.days.length) { box.innerHTML = '<div class="empty">ช่วงที่เลือกยังไม่มีการบันทึกบัญชี</div>'; return; }
+  const posSeries = posSalesSeries();
+  if (!t.days.length && !posSeries.length) { box.innerHTML = '<div class="empty">ช่วงที่เลือกยังไม่มีบิลแคชเชียร์หรือการบันทึกบัญชี</div>'; return; }
 
-  const series = dailySeries();
-  const byDate = {}; series.forEach(d => { byDate[d.date] = d; });
+  const posByDate = {}; posSeries.forEach(d => { posByDate[d.date] = d; });
+  const accByDate = {}; t.days.forEach(d => { accByDate[d.date] = d; });
   const h = [];
 
-  // 1) กระทบยอดขาย
-  let ordRev = 0, accNet = 0, cmpDays = 0, qtySum = 0;
+  // 1) เงินจริง: เครื่องแคชเชียร์ เทียบ บัญชี
+  let posRev = 0, accNet = 0, cmpDays = 0;
+  const missingAcc = [], missingPos = [];
   const rowsHtml = [];
-  t.days.forEach(d => {
-    const o = byDate[d.date];
-    if (!o || (o.rev <= 0 && d.net <= 0)) return;
-    cmpDays++; ordRev += o.rev; accNet += d.net; qtySum += o.qty;
-    const diff = d.net - o.rev;
-    const dp = o.rev > 0 ? (diff / o.rev * 100) : null;
-    const bad = (dp != null && Math.abs(dp) > 10);
-    rowsHtml.push('<tr><td>' + d.date + (o.snapOnly ? ' <span class="hint">(บีบอัด)</span>' : '') + '</td>' +
-      '<td class="r">' + baht(o.rev) + '</td><td class="r">' + baht(d.net) + '</td>' +
+  const cmpDates = Array.from(new Set(Object.keys(posByDate).concat(Object.keys(accByDate)))).sort();
+  cmpDates.forEach(date => {
+    const p = posByDate[date] || { rev: 0 };
+    const a = accByDate[date] || null;
+    const net = a ? a.net : 0;
+    if (p.rev <= 0 && net <= 0) return;
+    cmpDays++; posRev += p.rev; accNet += net;
+    if (!a && p.rev > 0) missingAcc.push(date);
+    if (!posByDate[date] && net > 0) missingPos.push(date);
+    const diff = net - p.rev;
+    const dp = p.rev > 0 ? (diff / p.rev * 100) : null;
+    const bad = !a || !posByDate[date] || (dp != null && Math.abs(dp) > 5);
+    rowsHtml.push('<tr><td>' + date + '</td>' +
+      '<td class="r">' + (posByDate[date] ? baht(p.rev) : '–') + '</td><td class="r">' + (a ? baht(net) : '–') + '</td>' +
       '<td class="r" style="color:' + (bad ? '#C1533A' : '#8a857c') + '"><b>' + (diff >= 0 ? '+' : '') + baht(diff) + '</b></td>' +
       '<td class="r">' + (dp == null ? '–' : (dp >= 0 ? '+' : '') + num1(dp) + '%') + '</td></tr>');
   });
-  const gap = accNet - ordRev;
-  const gapPct = ordRev > 0 ? (gap / ordRev * 100) : null;
-  h.push('<h3>1. ยอดขายจากออเดอร์ เทียบ เงินที่จดจริง</h3>' +
-    '<div class="fin-t">' +
-    finTile('จากระบบออเดอร์', baht(ordRev), 'raw × ราคาเมนู · ' + cmpDays + ' วัน', '') +
-    finTile('จากการจดบัญชี', baht(accNet), 'ยอดขายสุทธิ', '') +
-    finTile('ส่วนต่าง', (gap >= 0 ? '+' : '') + baht(gap), gapPct == null ? '' : num1(gapPct) + '% ของยอดออเดอร์', (gapPct != null && Math.abs(gapPct) > 5) ? 'fin-neg' : '') +
-    '</div>');
-  if (gapPct != null) {
-    let msg;
-    if (Math.abs(gapPct) <= 5) msg = '<div class="note">✅ สองระบบตรงกันในเกณฑ์ปกติ (±5%) — การจดออเดอร์กับการรับเงินสอดคล้องกัน</div>';
-    else if (gapPct < 0) msg = '<div class="note warn">⚠️ เงินจริง<b>น้อยกว่า</b>ยอดออเดอร์ ' + baht(Math.abs(gap)) + ' (' + num1(Math.abs(gapPct)) + '%) — สาเหตุที่เป็นไปได้: คิดเงินขาด / ลดราคาแล้วไม่ได้แก้ในระบบ / ราคาเมนูในระบบสูงเกินจริง / เงินหาย</div>';
-    else msg = '<div class="note warn">⚠️ เงินจริง<b>มากกว่า</b>ยอดออเดอร์ ' + baht(gap) + ' (' + num1(gapPct) + '%) — มักแปลว่า: มีการขายที่ไม่ได้จดลงระบบออเดอร์ / เมนูบางตัวยังไม่ได้ตั้งราคา / นับเงินทอนเกิน</div>';
-    h.push(msg);
-  }
-  if (rowsHtml.length) {
-    h.push('<table class="bm"><tr><th>วัน</th><th class="r">ออเดอร์</th><th class="r">บัญชี</th><th class="r">ต่าง</th><th class="r">%</th></tr>' + rowsHtml.join('') + '</table>');
+  const cashGap = accNet - posRev;
+  const cashGapPct = posRev > 0 ? (cashGap / posRev * 100) : null;
+  h.push('<h3>1. เงินจริง: เครื่องแคชเชียร์ เทียบ บัญชี</h3>');
+  if (!posSeries.length) {
+    h.push('<div class="empty">ช่วงนี้ยังไม่มีบิลแคชเชียร์ จึงยังกระทบยอดเงินจริงไม่ได้</div>');
+  } else {
+    h.push('<div class="fin-t">' +
+      finTile('ยอดบิลแคชเชียร์', baht(posRev), cmpDays + ' วันที่มียอด', missingAcc.length ? 'fin-neg' : '') +
+      finTile('ยอดขายสุทธิในบัญชี', baht(accNet), 'ใช้ช่อง netSales', '') +
+      finTile('ส่วนต่างเงินจริง', (cashGap >= 0 ? '+' : '') + baht(cashGap), cashGapPct == null ? '' : num1(cashGapPct) + '% ของยอดแคชเชียร์', (missingAcc.length || missingPos.length || (cashGapPct != null && Math.abs(cashGapPct) > 5)) ? 'fin-neg' : '') +
+      '</div>');
+    if (cashGapPct != null) {
+      if (!missingAcc.length && !missingPos.length && Math.abs(cashGapPct) <= 5) h.push('<div class="note">✅ ยอดแคชเชียร์และบัญชีตรงกันในเกณฑ์ปกติ (±5%)</div>');
+      else if (Math.abs(cashGapPct) > 5) h.push('<div class="note warn">⚠️ ยอดบัญชีกับบิลแคชเชียร์ต่างกัน <b>' + baht(Math.abs(cashGap)) + '</b> (' + num1(Math.abs(cashGapPct)) + '%) — ตรวจเงินทอนตั้งต้น การกรอกช่องทางชำระ บิลที่ไม่ได้ปิดผ่านแคชเชียร์ และยอดเดลิเวอรีที่บันทึกบัญชีแต่ไม่ผ่านแคชเชียร์</div>');
+      else h.push('<div class="note warn">⚠️ ยอดรวมต่างกันไม่เกิน 5% แต่ข้อมูลบางวันยังไม่ครบ จึงยังสรุปว่า “ตรงกัน” ไม่ได้</div>');
+    }
+    if (missingAcc.length) h.push('<div class="note warn">ยังไม่ได้บันทึกบัญชี ' + missingAcc.length + ' วัน: <b>' + missingAcc.join(' · ') + '</b></div>');
+    if (missingPos.length) h.push('<div class="note warn">บัญชีมียอดขาย แต่ไม่พบบิลแคชเชียร์ ' + missingPos.length + ' วัน: <b>' + missingPos.join(' · ') + '</b></div>');
+    if (rowsHtml.length) {
+      h.push('<table class="bm"><tr><th>วัน</th><th class="r">แคชเชียร์</th><th class="r">บัญชีสุทธิ</th><th class="r">ต่าง</th><th class="r">%</th></tr>' + rowsHtml.join('') + '</table>');
+    }
   }
 
   // 2) food cost จริง vs ทฤษฎี
   const agg = menuAgg();
-  let theoCost = 0, theoRev = 0, costedRev = 0;
+  let theoCost = 0, costedRev = 0;
   Object.keys(agg).forEach(k => {
-    theoRev += agg[k].rev;
     if (costOf(k) > 0) { theoCost += agg[k].cost; costedRev += agg[k].rev; }
   });
-  const coverage = theoRev > 0 ? costedRev / theoRev * 100 : 0;
+  const actualSalesBase = salesStats().rev || t.net;
+  const coverage = actualSalesBase > 0 ? costedRev / actualSalesBase * 100 : 0;
   const theoPct = costedRev > 0 ? (theoCost / costedRev * 100) : null;
   const actualPct = fpct(t.foodCost, t.net);
   let fc = '<h3>2. Food Cost จริง เทียบ ที่ควรจะเป็น</h3>';
   if (theoPct == null) {
     fc += '<div class="empty">ยังเทียบไม่ได้ — ไปกรอกต้นทุนต่อจานที่แท็บ “ตั้งต้นทุน” ก่อน อย่างน้อย 20 เมนูขายดี</div>';
   } else {
-    const gapp = (actualPct != null) ? (actualPct - theoPct) : null;
+    const comparable = coverage >= 80 && coverage <= 120;
+    const gapp = (actualPct != null && comparable) ? (actualPct - theoPct) : null;
     const leak = (gapp != null && t.net > 0) ? (gapp / 100 * t.net) : null;
     fc += '<div class="fin-t">' +
-      finTile('Food Cost ที่ควรเป็น (ทฤษฎี)', num1(theoPct) + '%', 'จากต้นทุนต่อจานที่กรอกไว้', '') +
+      finTile('Food Cost ทฤษฎีของเมนูที่รู้ชื่อ', num1(theoPct) + '%', 'จากต้นทุนต่อจานที่กรอกไว้', '') +
       finTile('Food Cost จริง', actualPct == null ? '–' : num1(actualPct) + '%', 'เงินซื้อของจริง ÷ ยอดขาย', '') +
-      finTile('ส่วนต่าง (รอยรั่ว)', gapp == null ? '–' : (gapp >= 0 ? '+' : '') + num1(gapp) + ' จุด', leak == null ? '' : '≈ ' + baht(Math.abs(leak)) + ' ในช่วงนี้', (gapp != null && gapp > 3) ? 'fin-neg' : 'fin-pos') +
-      finTile('ความครอบคลุมต้นทุน', num1(coverage) + '%', 'ของยอดขายที่มีต้นทุนกรอกไว้', coverage < 60 ? 'fin-neg' : '') +
+      finTile('ส่วนต่างอ้างอิง', gapp == null ? 'ยังไม่คำนวณ' : (gapp >= 0 ? '+' : '') + num1(gapp) + ' จุด', leak == null ? 'ต้องครอบคลุมยอดจริงอย่างน้อย 80%' : '≈ ' + baht(Math.abs(leak)) + ' ในช่วงนี้', (gapp != null && gapp > 3) ? 'fin-neg' : '') +
+      finTile('ความครอบคลุมต้นทุน', num1(coverage) + '%', 'ยอดเมนูที่มีต้นทุน ÷ ยอดขายจริง', comparable ? '' : 'fin-neg') +
       '</div>';
-    if (coverage < 60) fc += '<div class="note warn">กรอกต้นทุนเมนูไว้เพียง ' + num1(coverage) + '% ของยอดขาย — ตัวเลขทฤษฎียังไม่น่าเชื่อถือ</div>';
+    if (!comparable) fc += '<div class="note warn">ข้อมูลต้นทุนเทียบได้ประมาณ ' + num1(coverage) + '% ของยอดขายจริง — ยังไม่ตีความส่วนต่างเป็น “ของรั่ว” เพราะร้านมีอาหารหยิบเองที่ไม่รู้ชื่อเมนู บางเมนูยังไม่มีต้นทุน หรือราคาสองระบบไม่ตรงกัน</div>';
     else if (gapp != null && gapp > 3) fc += '<div class="note warn">ซื้อของแพงกว่าสูตรอยู่ ' + num1(gapp) + ' จุด ≈ <b>' + baht(Math.abs(leak)) + '</b> — สาเหตุปกติ: ตักเกินสูตร · ของเสีย/หมดอายุ · ของขึ้นราคาแต่ยังไม่ได้อัปต้นทุน · ของหาย · สต็อกเกินช่วงสิ้นเดือน</div>';
-    else fc += '<div class="note">✅ ซื้อของใกล้เคียงกับสูตร — การควบคุมของอยู่ในเกณฑ์</div>';
+    else fc += '<div class="note">✅ ต้นทุนซื้อจริงใกล้เคียงสูตรในระดับที่ข้อมูลครอบคลุมเพียงพอ</div>';
   }
   h.push(fc);
 
-  // 3) ต้นทุนต่อจาน / กำไรต่อจาน
-  let qty = 0, bills = 0;
-  series.forEach(d => { qty += d.qty; bills += d.bills; });
-  let pj = '<h3>3. ต้นทุนและกำไรต่อจาน / ต่อบิล</h3>';
+  // 3) ต้นทุนต่อหน่วย / กำไรต่อบิล จากยอดขายจริง
+  const actual = salesStats();
+  const qty = actual.qty, bills = actual.bills;
+  let pj = '<h3>3. ต้นทุนและกำไรต่อหน่วย / ต่อบิล</h3>';
   if (qty > 0) {
     pj += '<div class="fin-t">' +
-      finTile('กำไรสุทธิต่อจาน', baht(t.profit / qty), 'จาก ' + qty.toLocaleString() + ' จาน', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
-      finTile('ต้นทุนค่าแรงต่อจาน', baht(t.labor / qty), 'ยิ่งต่ำยิ่งคุ้ม', '') +
-      finTile('ต้นทุนวัตถุดิบต่อจาน', baht(t.foodCost / qty), 'เงินซื้อจริง ÷ จำนวนจาน', '') +
+      finTile('กำไรสุทธิต่อหน่วย', baht(t.profit / qty), 'จาก ' + qty.toLocaleString() + ' หน่วยที่แคชเชียร์นับ', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
+      finTile('ต้นทุนค่าแรงต่อหน่วย', baht(t.labor / qty), 'ยิ่งต่ำยิ่งคุ้ม', '') +
+      finTile('ต้นทุนวัตถุดิบต่อหน่วย', baht(t.foodCost / qty), 'เงินซื้อจริง ÷ จำนวนหน่วย', '') +
       finTile('กำไรสุทธิต่อบิล', bills ? baht(t.profit / bills) : '–', bills ? bills.toLocaleString() + ' บิล' : '', t.profit >= 0 ? 'fin-pos' : 'fin-neg') +
       '</div><p class="hint">ใช้ดูว่าการเพิ่มคน/เพิ่มรอบขายคุ้มไหม · ถ้าต้นทุนแรงต่อจานสูง แปลว่าคนมากเกินเมื่อเทียบกับงาน</p>';
   } else {
@@ -1553,10 +1611,10 @@ function renderRecon() {
 
   h.push(renderGuestSection(t));
 
-  // 4) ช่องทางเงิน
+  // 5) ช่องทางเงิน
   const payTot = t.cash + t.transfer + t.half;
   if (payTot > 0) {
-    h.push('<h3>6. สัดส่วนการรับชำระ (จากบัญชี)</h3><table class="bm">' +
+    h.push('<h3>5. สัดส่วนการรับชำระ (จากบัญชี)</h3><table class="bm">' +
       '<tr><th>ช่องทาง</th><th class="r">บาท</th><th class="r">%</th></tr>' +
       '<tr><td>เงินสด</td><td class="r">' + baht(t.cash) + '</td><td class="r">' + fpctTxt(t.cash, payTot) + '</td></tr>' +
       '<tr><td>เงินโอน</td><td class="r">' + baht(t.transfer) + '</td><td class="r">' + fpctTxt(t.transfer, payTot) + '</td></tr>' +
@@ -1600,17 +1658,19 @@ function renderInsights() {
   const exec = document.getElementById('execSummary');
   if (!box) return;
 
-  const series = dailySeries();
+  const actual = salesStats();
+  const series = actual.series;
   const days = series.length || 1;
-  const rev = series.reduce((s, d) => s + d.rev, 0);
-  const plates = RAW.reduce((s, r) => s + r.qty, 0);
-  const bills = BILLS.length;
+  const rev = actual.rev;
+  const plates = actual.qty;
+  const orderPlates = RAW.reduce((s, r) => s + r.qty, 0);
+  const bills = actual.bills;
   const aov = bills ? rev / bills : 0;
   const ipb = bills ? plates / bills : 0;
   const F = [];
 
-  if (!RAW.length) {
-    exec.innerHTML = '<div class="exec"><h2>สรุปผู้บริหาร</h2><p>ช่วงที่เลือกยังไม่มีข้อมูลรายจาน — ลองขยายช่วงวัน หรือเปิดด้วย <code>?demo=1</code> เพื่อดูตัวอย่าง</p></div>';
+  if (!series.length && !RAW.length) {
+    exec.innerHTML = '<div class="exec"><h2>สรุปผู้บริหาร</h2><p>ช่วงที่เลือกยังไม่มีข้อมูลบิลหรือข้อมูลรายจาน — ลองขยายช่วงวัน หรือเปิดด้วย <code>?demo=1</code> เพื่อดูตัวอย่าง</p></div>';
     box.innerHTML = '<div class="empty">ยังวิเคราะห์ไม่ได้</div>';
     return;
   }
@@ -1651,7 +1711,8 @@ function renderInsights() {
   }
 
   /* ---------- 2. จานต่อบิล / บิลจานเดียว ---------- */
-  const solo = BILLS.filter(b => b.qty <= 1).length;
+  const basketBills = actual.usingPos ? posMainBills() : BILLS;
+  const solo = basketBills.filter(b => b.qty <= 1).length;
   const soloPct = bills ? solo / bills * 100 : 0;
   if (bills >= 20 && (ipb < 1.8 || soloPct > 35)) {
     F.push({ sev: 'warn', title: 'โอกาสเชียร์ขาย — จานต่อบิลเพียง ' + num1(ipb),
@@ -1660,16 +1721,14 @@ function renderInsights() {
   }
 
   /* ---------- 3. ช่วงเวลาขายดี / ช่วงเวลาตาย ---------- */
-  const byHour = {}, byDow = {}, dowDays = {};
-  RAW.forEach(r => {
-    const h = r.ts.getHours(), d = r.ts.getDay();
-    byHour[h] = (byHour[h] || 0) + priceOf(r.item) * r.qty;
-    if (!byHour[h]) byHour[h] = byHour[h] || 0;
-    byDow[d] = (byDow[d] || 0) + priceOf(r.item) * r.qty;
-  });
+  const byDow = {}, dowDays = {};
   const hourQty = {};
   RAW.forEach(r => { const h = r.ts.getHours(); hourQty[h] = (hourQty[h] || 0) + r.qty; });
-  series.forEach(d => { const dt = new Date(d.date + 'T12:00:00'); dowDays[dt.getDay()] = (dowDays[dt.getDay()] || 0) + 1; });
+  series.forEach(d => {
+    const dt = new Date(d.date + 'T12:00:00'), dow = dt.getDay();
+    dowDays[dow] = (dowDays[dow] || 0) + 1;
+    byDow[dow] = (byDow[dow] || 0) + d.rev;
+  });
 
   const hours = Object.keys(hourQty).map(Number).sort((a, b) => a - b);
   if (hours.length >= 3) {
@@ -1683,7 +1742,7 @@ function renderInsights() {
       const q = hourQty[h] || 0;
       if (q < totalQ / (openMax - openMin + 1) * 0.35) dead.push(h);
     }
-    F.push({ sev: 'info', title: 'ชั่วโมงทอง คือ ' + hhLabel(peak) + '–' + hhLabel(peak + 1),
+    F.push({ sev: 'info', title: 'ชั่วโมงที่ครัวรับออเดอร์สูงสุด คือ ' + hhLabel(peak) + '–' + hhLabel(peak + 1),
       ev: 'ชั่วโมงนี้ทำยอดได้ <b>' + pct(peakShare) + '</b> ของจานทั้งหมด (' + hourQty[peak].toLocaleString('th-TH') + ' จาน) · 3 อันดับแรก: ' +
         sortedH.slice(0, 3).map(h => hhLabel(h) + ' (' + hourQty[h] + ')').join(' · '),
       act: 'จัดกำลังคนและ prep วัตถุดิบให้เสร็จก่อน ' + hhLabel(peak) + ' อย่างน้อย 45 นาที · ห้ามให้วัตถุดิบขาดช่วงนี้เด็ดขาด' });
@@ -1759,7 +1818,8 @@ function renderInsights() {
   /* ---------- 7. สัดส่วนช่องทาง ---------- */
   if (bills >= 20) {
     const chRev = {};
-    BILLS.forEach(b => { chRev[b.channel] = (chRev[b.channel] || 0) + b.rev; });
+    const chData = salesByChannel();
+    Object.keys(chData).forEach(c => { chRev[c] = chData[c].rev; });
     const chTotal = Object.values(chRev).reduce((a, b) => a + b, 0);
     const delRev = DELIVERY.reduce((s, c) => s + (chRev[c] || 0), 0);
     const delShare = chTotal ? delRev / chTotal * 100 : 0;
@@ -1802,7 +1862,7 @@ function renderInsights() {
   const cmList = Object.keys(cm).map(k => ({ c: k, n: cm[k] })).sort((a, b) => b.n - a.n);
   if (cmList.length) {
     const cmTotal = cmList.reduce((s, i) => s + i.n, 0);
-    const sharePct = plates ? cmTotal / plates * 100 : 0;
+    const sharePct = orderPlates ? cmTotal / orderPlates * 100 : 0;
     F.push({ sev: sharePct >= 20 ? 'warn' : 'info',
       title: 'ลูกค้าขอพิเศษ ' + pct(sharePct) + ' ของจานทั้งหมด',
       ev: 'คำขอยอดฮิต: ' + cmList.slice(0, 5).map(i => '<b>' + esc(i.c) + '</b> (' + i.n + ')').join(' · ') +
@@ -1857,33 +1917,37 @@ function renderInsights() {
 }
 
 function renderMeta() {
-  const plates = RAW.reduce((s, r) => s + r.qty, 0);
+  const s = salesStats();
   document.getElementById('metaLine').textContent =
     isoLocal(RANGE.from) + ' ถึง ' + isoLocal(RANGE.to) + ' · ' +
-    plates.toLocaleString('th-TH') + ' จาน · ' + BILLS.length.toLocaleString('th-TH') + ' บิล' +
+    s.qty.toLocaleString('th-TH') + ' หน่วย · ' + s.bills.toLocaleString('th-TH') + ' บิล' +
+    (s.usingPos ? ' · ยอดจากแคชเชียร์' : ' · ประมาณจากออเดอร์') +
     (DEMO ? ' · ข้อมูลตัวอย่าง' : '');
 
   const notes = [];
   if (DEMO) notes.push('<div class="note warn">โหมดตัวอย่าง — ข้อมูลทั้งหมดเป็นข้อมูลสมมติ ไม่ใช่ยอดจริงของร้าน</div>');
   if (SNAPONLY > 0) notes.push('<div class="note warn">มี ' + SNAPONLY +
     ' วันที่ถูกบีบอัดแล้ว (เหลือแต่ยอดรวมรายวัน) วันเหล่านั้นจะไม่ปรากฏในรายงานรายชั่วโมง / รายโต๊ะ / เวลาครัว</div>');
-  if (!Object.keys(COSTS).length) notes.push('<div class="note">ยังไม่ได้กรอกต้นทุนวัตถุดิบ — รายงานกำไรจะใช้ราคาขายแทนไปก่อน ไปที่แท็บ “ตั้งต้นทุน” เพื่อให้ตัวเลขกำไรแม่นจริง</div>');
+  if (!Object.keys(COSTS).length) notes.push('<div class="note">ยังไม่ได้กรอกต้นทุนวัตถุดิบ — ระบบจะแสดงความนิยมของเมนูได้ แต่จะยังไม่จัดกลุ่มกำไรจนกว่าจะกรอกต้นทุน</div>');
+  notes.push('<div class="note">รายงานยอดขาย/AOV ใช้บิลแคชเชียร์จริง · รายงานชื่อเมนูและเวลาครัวใช้เฉพาะรายการที่ลงระบบออเดอร์ จึงไม่รวมอาหารหยิบเองที่ระบุชื่อไม่ได้</div>');
   document.getElementById('dataNote').innerHTML = notes.join('');
 }
 
 function renderKpis() {
-  const series = dailySeries();
-  const rev = series.reduce((s, d) => s + d.rev, 0);
-  const plates = series.reduce((s, d) => s + d.qty, 0);
-  const bills = BILLS.length;
+  const actual = salesStats();
+  const series = actual.series;
+  const rev = actual.rev;
+  const plates = actual.qty;
+  const bills = actual.bills;
   const aov = bills ? rev / bills : 0;
-  const ipb = bills ? RAW.reduce((s, r) => s + r.qty, 0) / bills : 0;
-  const days = series.length || 1;
+  const ipb = bills ? plates / bills : 0;
+  const days = actual.activeDays || 1;
   const cost = RAW.reduce((s, r) => s + costOf(r.item) * r.qty, 0);
   const revRaw = RAW.reduce((s, r) => s + priceOf(r.item) * r.qty, 0);
   const gpPct = revRaw > 0 && cost > 0 ? (revRaw - cost) / revRaw * 100 : null;
   let fee = 0;
-  BILLS.forEach(b => { if (DELIVERY.indexOf(b.channel) >= 0) fee += b.rev * gpRate(); });
+  const chData = salesByChannel();
+  DELIVERY.forEach(c => { fee += ((chData[c] && chData[c].rev) || 0) * gpRate(); });
 
   const half = Math.floor(series.length / 2);
   const sum = (arr, k) => arr.reduce((s, d) => s + d[k], 0);
@@ -1894,18 +1958,18 @@ function renderKpis() {
   };
 
   document.getElementById('kpis').innerHTML =
-    kpi('ยอดขายรวม', baht(rev) + ' ฿', delta('rev')) +
-    kpi('จำนวนบิล', bills.toLocaleString('th-TH')) +
+    kpi('ยอดขายจริง', baht(rev) + ' ฿', delta('rev')) +
+    kpi('จำนวนบิลจริง', bills.toLocaleString('th-TH')) +
     kpi('ยอดต่อบิล (AOV)', baht(aov) + ' ฿') +
-    kpi('จานต่อบิล', num1(ipb)) +
-    kpi('ยอดขายเฉลี่ย/วัน', baht(rev / days) + ' ฿') +
-    kpi('จานที่ขายได้', plates.toLocaleString('th-TH'), delta('qty')) +
-    kpi('กำไรขั้นต้น', gpPct == null ? 'ยังไม่มีต้นทุน' : pct(gpPct)) +
+    kpi('หน่วยต่อบิล', num1(ipb)) +
+    kpi('ยอดขายเฉลี่ย/วันที่ขาย', baht(rev / days) + ' ฿') +
+    kpi('หน่วยที่แคชเชียร์นับ', plates.toLocaleString('th-TH'), delta('qty')) +
+    kpi('กำไรขั้นต้นเมนูในออเดอร์', gpPct == null ? 'ยังไม่มีต้นทุน' : pct(gpPct)) +
     kpi('ค่าคอมเดลิเวอรี', baht(fee) + ' ฿');
 }
 
 function renderTrend() {
-  const series = dailySeries();
+  const series = salesSeries();
   const W = 1000, H = 220, P = 6;
   if (!series.length) { document.getElementById('trendSvg').innerHTML = '<div class="empty">ไม่มีข้อมูล</div>'; return; }
   const max = Math.max(1, ...series.map(d => d.rev));
@@ -1959,7 +2023,7 @@ function renderHeat() {
 function renderDow() {
   const names = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์'];
   const agg = names.map(() => ({ rev: 0, bills: 0, days: new Set() }));
-  dailySeries().forEach(d => {
+  salesSeries().forEach(d => {
     const dt = new Date(d.date + 'T12:00:00'); const i = dt.getDay();
     agg[i].rev += d.rev; agg[i].bills += d.bills; agg[i].days.add(d.date);
   });
@@ -1981,10 +2045,20 @@ function renderDaypart() {
     { n: 'ดึก 21+', f: h => h >= 21 || h < 10 }
   ];
   const agg = parts.map(() => ({ rev: 0, qty: 0 }));
-  RAW.forEach(r => {
-    const h = r.ts.getHours();
-    parts.forEach((p, i) => { if (p.f(h)) { agg[i].rev += priceOf(r.item) * r.qty; agg[i].qty += r.qty; } });
-  });
+  const usePos = posSalesSeries().length > 0;
+  if (usePos) {
+    (POSD.bills || []).forEach(b => {
+      const ts = b.openedAt || b.closedAt;
+      if (!ts) return;
+      const hr = ts.getHours();
+      parts.forEach((p, i) => { if (p.f(hr)) { agg[i].rev += Number(b.total) || 0; agg[i].qty += Number(b.qty) || 0; } });
+    });
+  } else {
+    RAW.forEach(r => {
+      const hr = r.ts.getHours();
+      parts.forEach((p, i) => { if (p.f(hr)) { agg[i].rev += priceOf(r.item) * r.qty; agg[i].qty += r.qty; } });
+    });
+  }
   const total = agg.reduce((s, a) => s + a.rev, 0) || 1;
   const max = Math.max(1, ...agg.map(a => a.rev));
   const rows = parts.map((p, i) => [
@@ -1992,7 +2066,7 @@ function renderDaypart() {
     baht(agg[i].rev) + ' ฿', pct(agg[i].rev / total * 100)
   ]);
   document.getElementById('daypartTable').innerHTML =
-    tbl(['ช่วงมื้อ', '', 'จาน', 'ยอดขาย', 'สัดส่วน'], rows, { num: [2, 3, 4] });
+    tbl(['ช่วงมื้อ', '', 'หน่วย', 'ยอดขาย', 'สัดส่วน'], rows, { num: [2, 3, 4] });
 }
 
 function renderMenu() {
@@ -2001,7 +2075,7 @@ function renderMenu() {
     const a = m[name];
     const price = a.qty ? a.rev / a.qty : priceOf(name);
     const cost = a.qty ? a.cost / a.qty : costOf(name);
-    const margin = cost > 0 ? price - cost : price;
+    const margin = cost > 0 ? price - cost : null;
     return { name, qty: a.qty, rev: a.rev, price, cost, margin, marginPct: price ? (price - cost) / price * 100 : 0 };
   }).sort((a, b) => b.rev - a.rev);
 
@@ -2026,9 +2100,9 @@ function renderMenu() {
     tbl(['เมนู', '', 'จาน', 'ยอดขาย', 'สัดส่วน', 'สะสม', 'อัตรากำไร'], rows, { num: [2, 3, 4, 5, 6] });
 
   // matrix
-  const sig = list.filter(x => x.qty >= 1);
+  const sig = list.filter(x => x.qty >= 1 && x.cost > 0 && x.margin != null);
   const box = document.getElementById('matrix');
-  if (!sig.length) { box.innerHTML = '<div class="empty">ไม่มีข้อมูล</div>'; }
+  if (!sig.length) { box.innerHTML = '<div class="empty">ยังไม่มีเมนูที่กรอกต้นทุนเพียงพอสำหรับจัดกลุ่มกำไร</div>'; }
   else {
     const avgQty = sig.reduce((s, x) => s + x.qty, 0) / sig.length;
     const avgMargin = sig.reduce((s, x) => s + x.margin, 0) / sig.length;
@@ -2135,11 +2209,8 @@ function renderKitchen() {
 }
 
 function renderChannel() {
-  const byCh = {};
-  BILLS.forEach(b => {
-    const o = byCh[b.channel] = byCh[b.channel] || { bills: 0, rev: 0, qty: 0 };
-    o.bills++; o.rev += b.rev; o.qty += b.qty;
-  });
+  const usePos = posSalesSeries().length > 0;
+  const byCh = salesByChannel();
   const total = Object.values(byCh).reduce((s, o) => s + o.rev, 0) || 1;
   const maxRev = Math.max(1, ...Object.values(byCh).map(o => o.rev));
   const rows = Object.keys(byCh).sort((a, b) => byCh[b].rev - byCh[a].rev).map(c => {
@@ -2155,31 +2226,59 @@ function renderChannel() {
     'คิดค่าคอมเดลิเวอรีที่ ' + (Number(CFG.gp) || 0) + '% (แกร็บ/ไลน์แมน/ช้อปปี้) — แก้ได้ในแท็บ “ตั้งต้นทุน” · ยอดนี้ยังไม่หักต้นทุนวัตถุดิบ';
 
   const byTable = {};
-  BILLS.filter(b => b.channel === 'ทานที่ร้าน' || b.channel === 'โต๊ะจอง').forEach(b => {
-    const o = byTable[b.table] = byTable[b.table] || { bills: 0, rev: 0, qty: 0 };
-    o.bills++; o.rev += b.rev; o.qty += b.qty;
-  });
+  if (usePos) {
+    posMainBills().forEach(b => {
+      const segs = (b.segments || []).filter(x => x && x.table);
+      if (segs.length > 1) {
+        segs.filter(x => posIsDine(x.table)).forEach(x => {
+          const k = String(x.table), o = byTable[k] = byTable[k] || { bills: 0, rev: 0, qty: 0 };
+          o.bills++; o.rev += Number(x.amount) || 0; o.qty += Number(x.qty) || 0;
+        });
+      } else if (posIsDine(b.table)) {
+        const o = byTable[b.table] = byTable[b.table] || { bills: 0, rev: 0, qty: 0 };
+        o.bills++; o.rev += Number(b.total) || 0; o.qty += Number(b.qty) || 0;
+      }
+    });
+    (POSD.bills || []).filter(b => b.splitFromTable && posIsDine(b.splitFromTable)).forEach(b => {
+      const k = b.splitFromTable, o = byTable[k] = byTable[k] || { bills: 0, rev: 0, qty: 0 };
+      o.rev += Number(b.total) || 0; o.qty += Number(b.qty) || 0;
+    });
+  } else {
+    BILLS.filter(b => b.channel === 'ทานที่ร้าน' || b.channel === 'โต๊ะจอง').forEach(b => {
+      const o = byTable[b.table] = byTable[b.table] || { bills: 0, rev: 0, qty: 0 };
+      o.bills++; o.rev += b.rev; o.qty += b.qty;
+    });
+  }
   document.getElementById('tableTable').innerHTML = tbl(
     ['โต๊ะ', 'บิล', 'ยอดขาย', 'ยอด/บิล', 'จาน/บิล'],
     Object.keys(byTable).sort((a, b) => byTable[b].rev - byTable[a].rev).slice(0, 15).map(t => {
       const o = byTable[t];
       return [esc(t), o.bills.toLocaleString('th-TH'), baht(o.rev) + ' ฿',
-        baht(o.rev / o.bills) + ' ฿', num1(o.qty / o.bills)];
+        o.bills ? baht(o.rev / o.bills) + ' ฿' : '–', o.bills ? num1(o.qty / o.bills) : '–'];
     }), { num: [1, 2, 3, 4] });
 
   const byStaff = {};
-  BILLS.forEach(b => {
-    if (!b.staff) return;
-    const o = byStaff[b.staff] = byStaff[b.staff] || { bills: 0, rev: 0, qty: 0 };
-    o.bills++; o.rev += b.rev; o.qty += b.qty;
-  });
+  if (usePos) {
+    (POSD.bills || []).forEach(b => {
+      if (!b.staff || b.staff === '–') return;
+      const o = byStaff[b.staff] = byStaff[b.staff] || { bills: 0, rev: 0, qty: 0 };
+      if (!b.splitFromTable) o.bills++;
+      o.rev += Number(b.total) || 0; o.qty += Number(b.qty) || 0;
+    });
+  } else {
+    BILLS.forEach(b => {
+      if (!b.staff) return;
+      const o = byStaff[b.staff] = byStaff[b.staff] || { bills: 0, rev: 0, qty: 0 };
+      o.bills++; o.rev += b.rev; o.qty += b.qty;
+    });
+  }
   document.getElementById('staffTable').innerHTML = tbl(
     ['พนักงาน', 'บิล', 'ยอดขาย', 'ยอด/บิล', 'จาน/บิล'],
     Object.keys(byStaff).sort((a, b) => byStaff[b].rev - byStaff[a].rev).map(s => {
       const o = byStaff[s];
       return [esc(s), o.bills.toLocaleString('th-TH'), baht(o.rev) + ' ฿',
-        baht(o.rev / o.bills) + ' ฿', num1(o.qty / o.bills)];
-    }), { num: [1, 2, 3, 4], empty: 'ยังไม่มีการบันทึกชื่อพนักงานในออเดอร์' });
+        o.bills ? baht(o.rev / o.bills) + ' ฿' : '–', o.bills ? num1(o.qty / o.bills) : '–'];
+    }), { num: [1, 2, 3, 4], empty: 'ยังไม่มีการบันทึกชื่อพนักงาน' });
 }
 
 function renderBasket() {
@@ -2774,9 +2873,9 @@ function renderVoids(){
   const empty = rows.filter(r => r.qty === 0).length;
   const noReason = rows.filter(r => !r.reason).length;
 
-  /* นับบิลปิดสำเร็จรายคน จาก BILLS ที่หน้านี้โหลดไว้แล้ว → คิดอัตรายกเลิก */
+  /* นับบิลปิดสำเร็จรายคนจากเครื่องแคชเชียร์ → คิดอัตรายกเลิก */
   const closedBy = {};
-  (typeof BILLS !== 'undefined' && Array.isArray(BILLS) ? BILLS : []).forEach(b => {
+  posMainBills().forEach(b => {
     const k = ((b.staff || '') + '').trim() || '(ไม่ระบุชื่อ)';
     closedBy[k] = (closedBy[k] || 0) + 1;
   });
