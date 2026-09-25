@@ -1148,6 +1148,9 @@ async function loadPos() {
 }
 
 function posIsDine(t) { return channelOf(t) === DINE_LABEL || channelOf(t) === 'โต๊ะจอง'; }
+// ใช้เฉพาะเช็ค "ลืมลงออเดอร์" — นับทานที่ร้าน + โต๊ะจอง + กลับบ้าน (อาหารออกจากครัวจริง ต้องลงออเดอร์)
+// ไม่นับเดลิเวอรี (แกร็บ/ไลน์แมน/ช้อปปี้) เพราะเงินไม่ได้เก็บผ่านเครื่องนี้ เอามาเทียบจะเพี้ยน
+function posIsDineOrTakeaway(t) { return posIsDine(t) || channelOf(t) === 'กลับบ้าน'; }
 
 function renderPos() {
   const box = document.getElementById('posBody');
@@ -1207,7 +1210,7 @@ function renderPos() {
 
   /* ---- พนักงานลืมลงออเดอร์กี่ % ---- */
   let posDinePlates = 0, posSkipped = 0;
-  B.filter(b => posIsDine(b.table)).forEach(b => {
+  B.filter(b => posIsDineOrTakeaway(b.table)).forEach(b => {
     if (b.items && b.items.length) {
       b.items.forEach(x => {
         const q = Number(x && x.qty) || 0;
@@ -1219,8 +1222,7 @@ function renderPos() {
   });
   let ordPlates = 0, ordSkipped = 0;
   RAW.forEach(r => {
-    const ch = channelOf(r.table);
-    if (ch !== DINE_LABEL && ch !== 'โต๊ะจอง') return;
+    if (!posIsDineOrTakeaway(r.table)) return;
     if (isCorePlate(r.item)) ordPlates += r.qty; else ordSkipped += r.qty;
   });
   if (posDinePlates > 0 && ordPlates > 0) {
@@ -1228,12 +1230,12 @@ function renderPos() {
     const gapPct = Math.round(gap / posDinePlates * 1000) / 10;
     const cls = gapPct >= 10 ? 'warn' : (gapPct <= -10 ? 'warn' : 'ok');
     h.push('<h3 style="margin-top:22px">พนักงานลืมลงออเดอร์กี่ %</h3>');
-    h.push('<div class="note ' + cls + '">แคชเชียร์นับจานทานที่ร้านได้ <b>' + posDinePlates.toLocaleString() + '</b> จาน · ' +
+    h.push('<div class="note ' + cls + '">แคชเชียร์นับจานทานที่ร้าน+กลับบ้านได้ <b>' + posDinePlates.toLocaleString() + '</b> จาน · ' +
       'ระบบออเดอร์มี <b>' + ordPlates.toLocaleString() + '</b> จาน → ต่างกัน <b>' + (gap >= 0 ? '+' : '') + gap.toLocaleString() + ' จาน (' + gapPct + '%)</b><br>' +
       (gapPct >= 10 ? 'แปลว่ามีอาหารออกจากครัวโดยไม่ได้ลงระบบ — กระทบยอดเมนูและสต็อกจะเพี้ยน' :
        (gapPct <= -10 ? 'ระบบออเดอร์มากกว่าที่เก็บเงิน — อาจมีการเก็บเงินขาด หรือนับจานตกหล่น' :
         'ตรงกันในเกณฑ์ที่ยอมรับได้ การลงออเดอร์ถือว่าครบ')) +
-      '<br><span class="hint">นับเฉพาะอาหารจานหลัก — ตัด ' + PLATE_EXCLUDE_LABEL + ' ออกทั้งสองฝั่ง (ตัดออก: ฝั่งเก็บเงิน ' + posSkipped.toLocaleString() + ' จาน · ฝั่งออเดอร์ ' + ordSkipped.toLocaleString() + ' จาน)</span></div>');
+      '<br><span class="hint">นับเฉพาะทานที่ร้าน/โต๊ะจอง/กลับบ้าน — ไม่รวมแกร็บ/ไลน์แมน/ช้อปปี้ (เงินไม่ได้เก็บผ่านเครื่องนี้) · ตัดอาหารประเภท ' + PLATE_EXCLUDE_LABEL + ' ออกทั้งสองฝั่งด้วย (ตัดออก: ฝั่งเก็บเงิน ' + posSkipped.toLocaleString() + ' จาน · ฝั่งออเดอร์ ' + ordSkipped.toLocaleString() + ' จาน)</span></div>');
   }
 
   /* ---- แยกรายโต๊ะ (บิลที่รวมจ่าย ถูกกระจายกลับเป็นรายโต๊ะแล้ว) ---- */
