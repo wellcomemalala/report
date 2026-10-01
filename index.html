@@ -127,6 +127,7 @@ code{background:#f2f1ee;border-radius:4px;padding:1px 5px;font-size:12.5px}
     <div class="controls">
       <select id="rangeSel">
         <option value="1">วันนี้</option>
+        <option value="yesterday">เมื่อวาน</option>
         <option value="7">7 วันล่าสุด</option>
         <option value="30" selected>30 วันล่าสุด</option>
         <option value="90">90 วันล่าสุด</option>
@@ -718,6 +719,11 @@ function rangeDates() {
     const f = document.getElementById('dFrom').value, t = document.getElementById('dTo').value;
     if (f) { from = new Date(f + 'T00:00:00'); }
     if (t) { const d = new Date(t + 'T23:59:59'); if (!isNaN(d)) return { from, to: d }; }
+    return { from, to };
+  }
+  if (sel === 'yesterday') {   // เมื่อวาน: 00:00 – 23:59:59 ของเมื่อวาน
+    from.setDate(from.getDate() - 1);
+    to.setDate(to.getDate() - 1);
     return { from, to };
   }
   from.setDate(from.getDate() - (Number(sel) - 1));
