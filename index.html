@@ -194,17 +194,17 @@ table.mr-t tr.tot td{font-weight:700;border-top:1px solid #d9d5cc}
     </div>
     <div class="controls">
       <select id="rangeSel">
-        <option value="1">วันนี้</option>
+        <option value="1" selected>วันนี้</option>
         <option value="yesterday">เมื่อวาน</option>
         <option value="7">7 วันล่าสุด</option>
-        <option value="30" selected>30 วันล่าสุด</option>
+        <option value="30">30 วันล่าสุด</option>
         <option value="90">90 วันล่าสุด</option>
         <option value="custom">เลือกช่วงเอง</option>
       </select>
       <input type="date" id="dFrom" class="hidden" />
       <input type="date" id="dTo" class="hidden" />
       <button class="pri" id="reloadBtn">โหลดข้อมูล</button>
-      <button id="csvBtn">ดาวน์โหลด CSV</button>
+      <button id="csvBtn" title="รวมข้อมูลทุกแท็บไว้ในไฟล์เดียว เพื่อส่งให้ AI วิเคราะห์">ดาวน์โหลด CSV</button>
     </div>
   </div>
 
@@ -262,7 +262,7 @@ table.mr-t tr.tot td{font-weight:700;border-top:1px solid #d9d5cc}
       </div>
       <div class="card">
         <h2>ยอดตามช่วงมื้อ</h2>
-        <p class="hint">กลางวัน 10:00–15:00 · บ่าย 15:00–17:00 · เย็น 17:00–21:00 · ดึก 21:00+</p>
+        <p class="hint">เช้า 07:00–10:00 · กลางวัน 10:00–15:00 · บ่าย 15:00–17:00 · เย็น 17:00–21:00 · ดึก 21:00+</p>
         <div id="daypartTable"></div>
       </div>
     </div>
@@ -2192,10 +2192,12 @@ function renderDow() {
 
 function renderDaypart() {
   const parts = [
+    { n: 'เช้า 07–10', f: h => h >= 7 && h < 10 },
     { n: 'กลางวัน 10–15', f: h => h >= 10 && h < 15 },
     { n: 'บ่าย 15–17', f: h => h >= 15 && h < 17 },
     { n: 'เย็น 17–21', f: h => h >= 17 && h < 21 },
-    { n: 'ดึก 21+', f: h => h >= 21 || h < 10 }
+    { n: 'ดึก 21+', f: h => h >= 21 },
+    { n: 'ก่อน 07:00 (ผิดปกติ)', f: h => h < 7, hideIfZero: true }
   ];
   const agg = parts.map(() => ({ rev: 0, qty: 0 }));
   const usePos = posSalesSeries().length > 0;
@@ -2217,7 +2219,7 @@ function renderDaypart() {
   const rows = parts.map((p, i) => [
     p.n, bar(agg[i].rev, max), agg[i].qty.toLocaleString('th-TH'),
     baht(agg[i].rev) + ' ฿', pct(agg[i].rev / total * 100)
-  ]);
+  ]).filter((r, i) => !(parts[i].hideIfZero && !agg[i].rev && !agg[i].qty));
   document.getElementById('daypartTable').innerHTML =
     tbl(['ช่วงมื้อ', '', 'หน่วย', 'ยอดขาย', 'สัดส่วน'], rows, { num: [2, 3, 4] });
 }
@@ -2546,23 +2548,344 @@ async function saveCosts() {
 }
 
 /* ============ CSV ============ */
-function downloadCsv() {
-  const series = dailySeries();
-  const m = menuAgg();
-  let csv = 'ส่วนที่ 1: ยอดรายวัน\nวันที่,ยอดขาย,จาน,บิล,ข้อมูลบีบอัดแล้ว\n';
-  series.forEach(d => { csv += [d.date, Math.round(d.rev), d.qty, d.bills, d.snapOnly ? 'ใช่' : ''].join(',') + '\n'; });
-  csv += '\nส่วนที่ 2: ยอดตามเมนู\nเมนู,จาน,ยอดขาย,ต้นทุนรวม,กำไรขั้นต้น\n';
-  Object.keys(m).sort((a, b) => m[b].rev - m[a].rev).forEach(k => {
-    const a = m[k];
-    csv += ['"' + k.replace(/"/g, '""') + '"', a.qty, Math.round(a.rev), Math.round(a.cost),
-      Math.round(a.rev - a.cost)].join(',') + '\n';
+/* ============ ส่งออกข้อมูลทั้งหมด (1 ไฟล์ CSV หลายส่วน เพื่อส่งให้ AI วิเคราะห์) ============
+   โครงสร้าง: แต่ละส่วนขึ้นต้นด้วยบรรทัด "### [รหัส] ชื่อส่วน" ตามด้วยบรรทัดอธิบาย (ขึ้นต้น #) แถวหัวคอลัมน์ และข้อมูล
+   ส่วนต่างๆ คั่นด้วยบรรทัดว่าง · ข้อมูลทุกส่วนอยู่ในช่วงวันที่ที่เลือกอยู่ในหน้านี้ (ยกเว้นส่วนเป้าหมาย) */
+function csvCell(v) {
+  if (v == null) return '';
+  if (v instanceof Date) v = fmtDT(v);
+  if (typeof v === 'number' && !isFinite(v)) return '';
+  let s = String(v);
+  if (/[",\r\n]/.test(s) || /^\s|\s$/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function fmtDT(d) {
+  return d ? isoLocal(d) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()) : '';
+}
+function expRound(n, k) { const m = Math.pow(10, k == null ? 1 : k); return Math.round((Number(n) || 0) * m) / m; }
+function expSection(out, id, title, note, head, rows) {
+  out.push(csvCell('### [' + id + '] ' + title));
+  if (note) out.push(csvCell('# ' + note));
+  if (!rows || !rows.length) { out.push('(ไม่มีข้อมูลในช่วงนี้)'); out.push(''); return; }
+  out.push(head.map(csvCell).join(','));
+  rows.forEach(r => out.push(r.map(csvCell).join(',')));
+  out.push('');
+}
+/* แปลงรายการ object → หัวคอลัมน์ + แถว (รวมทุกฟิลด์ที่มี ไม่ทิ้งอะไร) */
+function expObjs(list, preferred) {
+  const keys = [], seen = {};
+  (preferred || []).forEach(k => { seen[k] = 1; keys.push(k); });
+  list.forEach(o => Object.keys(o).forEach(k => { if (!seen[k]) { seen[k] = 1; keys.push(k); } }));
+  const rows = list.map(o => keys.map(k => {
+    const v = o[k];
+    return (v != null && typeof v === 'object') ? JSON.stringify(v) : v;
+  }));
+  return { head: keys, rows };
+}
+async function expSafe(out, id, title, fn) {
+  try { await fn(); }
+  catch (e) {
+    console.error('export ' + id, e);
+    expSection(out, id, title, 'ส่งออกส่วนนี้ไม่สำเร็จ: ' + (e && e.message ? e.message : e), [], []);
+  }
+}
+
+/* เก็บข้อความ/ตารางที่แสดงบนหน้าจอของแต่ละแท็บ (รวมข้อความวิเคราะห์อัตโนมัติ) */
+function expScreenRows() {
+  const panels = [
+    ['overview', 'ภาพรวม'], ['insight', 'สิ่งที่ต้องลงมือ'], ['goals', 'เป้า & เปรียบเทียบ (ไม่ขึ้นกับช่วงที่เลือก)'],
+    ['menu', 'เมนู & กำไร'], ['kitchen', 'ครัว'], ['channel', 'ช่องทาง & โต๊ะ'], ['basket', 'ตะกร้า & คำขอพิเศษ'],
+    ['finance', 'การเงิน (P&L)'], ['pos', 'แคชเชียร์ (ยอดขายจริง)'], ['recon', 'กระทบยอด']
+  ];
+  const sel = 'h2,h3,h4,.note,.hint,.kpi,.fin-t > div,.ins,.exec,table';
+  const clean = s => String(s || '').replace(/\s+/g, ' ').trim();
+  const txt = el => { const c = el.cloneNode(true); c.querySelectorAll('br').forEach(b => b.replaceWith(' / ')); c.querySelectorAll('svg,style,script').forEach(x => x.remove()); return clean(c.textContent); };
+  const sub = (el, q) => { const x = el.querySelector(q); return x ? txt(x) : ''; };
+  const rows = [];
+  panels.forEach(pn => {
+    const p = document.getElementById('p-' + pn[0]); if (!p) return;
+    let title = '';
+    Array.from(p.querySelectorAll(sel)).forEach(el => {
+      if (el.parentElement && el.parentElement.closest(sel) && p.contains(el.parentElement.closest(sel))) return; // ข้ามของที่ซ้อนอยู่ข้างใน
+      const tag = el.tagName.toLowerCase();
+      if (/^h[234]$/.test(tag)) { title = txt(el); rows.push([pn[1], 'หัวข้อ', title]); return; }
+      if (tag === 'table') {
+        el.querySelectorAll('tr').forEach(tr => {
+          const cells = Array.from(tr.children).map(txt);
+          if (cells.some(c => c !== '')) rows.push([pn[1], tr.querySelector('th') ? 'หัวตาราง' : 'ตาราง', title].concat(cells));
+        });
+        return;
+      }
+      if (el.classList.contains('kpi')) { rows.push([pn[1], 'ตัวเลขสรุป', title, sub(el, '.l'), sub(el, '.v'), sub(el, '.d')]); return; }
+      if (el.parentElement && el.parentElement.classList.contains('fin-t')) { rows.push([pn[1], 'ตัวเลขสรุป', title, sub(el, '.l'), sub(el, '.v'), sub(el, '.s')]); return; }
+      if (el.classList.contains('ins')) { rows.push([pn[1], 'ข้อวิเคราะห์อัตโนมัติ', sub(el, 'h4'), sub(el, '.ev'), sub(el, '.act')]); return; }
+      const t = txt(el); if (t) rows.push([pn[1], el.classList.contains('exec') ? 'สรุปผู้บริหาร' : 'ข้อความ', t]);
+    });
   });
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'report_' + isoLocal(RANGE.from) + '_' + isoLocal(RANGE.to) + '.csv';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  return rows;
+}
+
+async function buildFullExport() {
+  const out = [];
+  out.push(csvCell('### [TASK] คำสั่งสำหรับ AI ที่อ่านไฟล์นี้ (ทำตามนี้ได้เลย ไม่ต้องถามผู้ใช้กลับก่อน)'));
+  out.push(csvCell('# นี่คือข้อมูลของร้านอาหารไทยร้านเดียว ผู้ใช้คือเจ้าของร้านและไม่ใช่นักวิเคราะห์ข้อมูล ให้อ่านทุกส่วน (### [รหัส]) แล้ววิเคราะห์การบริหารและการตลาดของร้านจากข้อมูลจริงในไฟล์นี้ ตอบเป็นภาษาไทยที่เข้าใจง่าย'));
+  out.push(csvCell('# ลำดับคำตอบ: 1) สรุปภาพรวมสุขภาพร้านใน 5 บรรทัด 2) จุดแข็งและปัญหาที่เห็นจากตัวเลข พร้อมตัวเลขอ้างอิงและชื่อส่วนที่ใช้ 3) แผนปรับปรุงการบริหาร (ต้นทุน กำไร ค่าแรง ครัว กำลังคน ช่วงเวลาเงียบ) เรียงตามความเร่งด่วน 4) แผนการตลาด (เมนูที่ควรดัน โปรโมชันรายช่วงเวลา/รายวัน เซ็ตคู่ เดลิเวอรี) 5) ข้อมูลที่ขาดหรือไม่น่าเชื่อถือ และสิ่งที่ควรเก็บเพิ่ม'));
+  out.push(csvCell('# ข้อควรระวัง: อย่าเดาตัวเลขที่ไม่มีในไฟล์ · ถ้าช่วงข้อมูลสั้นมาก (เช่น 1-7 วัน) ให้เตือนว่าสรุปได้จำกัด · ยอดเงินจริงใช้ส่วนบิลแคชเชียร์/บัญชี ส่วนข้อมูลออเดอร์ใช้ดูเมนูและเวลาทำอาหารเท่านั้น · ถ้าต้นทุนเมนูเป็น 0 แปลว่ายังไม่ได้กรอก อย่าตีความว่ากำไร 100%'));
+  out.push('');
+  const now = new Date();
+  const dl = vdDateList();
+  const dates = dl.list;
+  const stats = salesStats();
+  const fin = finTotals();
+  const posB = POSD && Array.isArray(POSD.bills) ? POSD.bills : [];
+  const live = !!db && !DEMO;
+
+  /* --- ดึงข้อมูลที่ปกติโหลดเฉพาะตอนเปิดแท็บ (บิลยกเลิก / เดินตลาด / เป้า) --- */
+  let voids = [], voidsErr = '';
+  if (live) {
+    try {
+      const snaps = await Promise.all(dates.map(ds => db.ref(POS_PATH + 'voids/' + ds).once('value')));
+      snaps.forEach((sn, i) => {
+        const v = sn.val() || {};
+        Object.keys(v).forEach(k => {
+          const o = v[k] || {};
+          voids.push({ date: o.date || dates[i], table: String(o.table || ''), guests: Number(o.guests) || 0,
+            openedAt: o.openedAt || '', voidedAt: o.voidedAt || '', minutes: Number(o.minutes) || 0,
+            qty: Number(o.qty) || 0, subtotal: Number(o.subtotal) || 0, staff: String(o.staff || '').trim(),
+            reason: String(o.reason || '').trim(),
+            items: (o.items ? Object.values(o.items) : []).map(x => x ? (String(x.name || '') + '×' + (Number(x.qty) || 0)) : '').join(' | ') });
+        });
+      });
+    } catch (e) { voidsErr = e && e.message ? e.message : String(e); }
+  }
+  let mkRows = [];
+  if (live) {
+    try {
+      if (!MK_LOADED) await loadMarket();
+      const f = isoLocal(RANGE.from), t = isoLocal(RANGE.to);
+      mkRows = (MK_ROWS || []).filter(r => (r.date || '') >= f && (r.date || '') <= t);
+    } catch (e) { console.error(e); }
+  }
+  try { if (!GD.loaded && !GD.busy) await loadGoalData(); } catch (e) { console.error(e); }
+
+  /* --- 0. คำอธิบายไฟล์ --- */
+  const ids = [
+    ['SUMMARY', 'ตัวเลขสรุปรวมทั้งช่วง'], ['DAILY', 'ตารางรายวันรวมทุกแหล่ง (แคชเชียร์ + ออเดอร์ + บัญชี + ลูกค้า + บิลยกเลิก)'],
+    ['CHANNEL', 'ยอดตามช่องทาง (ทานที่ร้าน/กลับบ้าน/เดลิเวอรี ฯลฯ)'], ['PAYMENT', 'ยอดตามวิธีชำระเงิน'],
+    ['HOUR_POS', 'ยอดบิลแคชเชียร์ตามชั่วโมงที่เปิดบิล'], ['HEAT_ORDERS', 'จำนวนจานที่ครัวรับ แยกวันในสัปดาห์ × ชั่วโมง'],
+    ['MENU', 'ทุกเมนู: ยอดขาย ราคา ต้นทุน กำไร ครัวที่รับผิดชอบ (รวมเมนูที่ขายไม่ได้เลย)'],
+    ['POS_BILLS', 'บิลแคชเชียร์ทุกใบ'], ['POS_BILL_ITEMS', 'รายการอาหารในทุกบิลแคชเชียร์'],
+    ['ORDER_LINES', 'ออเดอร์ที่ครัวรับทุกบรรทัด พร้อมเวลาทำอาหาร'], ['ORDER_BILLS_EST', 'บิลที่ประมาณจากออเดอร์ (รวมเดลิเวอรี)'],
+    ['FIN_DAILY', 'บัญชีรายวันทุกฟิลด์'], ['FIN_PERIODIC', 'ค่าใช้จ่ายประจำงวด (ค่าเช่า ค่าไฟ ฯลฯ)'], ['FIN_BENCH', 'เกณฑ์เปรียบเทียบที่ร้านตั้งไว้'],
+    ['GUESTS', 'จำนวนลูกค้ารายวัน'], ['VOIDS', 'บิลที่ยกเลิก'], ['MARKET', 'วัตถุดิบที่ซื้อจากตลาด'],
+    ['GOAL_TARGETS', 'เป้ายอดขายรายเดือน'], ['GOAL_DAYS', 'ยอดรายวันที่ใช้คำนวณเป้า (ย้อนหลังตั้งแต่ต้นเดือนก่อน)'],
+    ['SCREEN', 'ข้อความ ตัวเลขสรุป ตาราง และข้อวิเคราะห์อัตโนมัติ ตามที่แสดงบนหน้าจอแต่ละแท็บ']
+  ];
+  expSection(out, 'README', 'อ่านก่อน — วิธีอ่านไฟล์นี้',
+    'ไฟล์ CSV เดียวที่รวมหลายส่วน แต่ละส่วนขึ้นต้นด้วย ### [รหัส] · เงินเป็นบาท · เวลาเป็นเวลาไทย (เวลาท้องถิ่นของเครื่อง) · ' +
+    'ช่อง "บิลแคชเชียร์" คือยอดเงินจริงที่เก็บ ส่วน "ออเดอร์" คือรายการที่ครัวรับ (ใช้ดูเมนู/เวลาทำอาหาร ไม่รวมของที่ไม่ได้ลงระบบ)',
+    ['รหัสส่วน', 'เนื้อหา'], ids);
+
+  const info = [
+    ['ชื่อร้าน', RC.shopName || ''],
+    ['ช่วงข้อมูลที่ส่งออก (จาก)', isoLocal(RANGE.from)], ['ช่วงข้อมูลที่ส่งออก (ถึง)', isoLocal(RANGE.to)],
+    ['จำนวนวันในช่วง', dates.length], ['ส่งออกเมื่อ', fmtDT(now)],
+    ['แหล่งยอดขายหลัก', stats.usingPos ? 'บิลแคชเชียร์จริง' : 'ประมาณจากออเดอร์ (ยังไม่มีบิลแคชเชียร์)'],
+    ['โหมดตัวอย่าง (ข้อมูลสมมติ)', DEMO ? 'ใช่' : 'ไม่ใช่'],
+    ['ค่าคอมเดลิเวอรี (GP %)', Number(CFG.gp) || 0],
+    ['วันที่เหลือแต่ยอดรวม (ถูกบีบอัด)', SNAPONLY],
+    ['มีการกรอกต้นทุนวัตถุดิบ', Object.keys(COSTS).length ? 'มี (' + Object.keys(COSTS).length + ' รายการ)' : 'ยังไม่มี']
+  ];
+  expSection(out, 'INFO', 'ข้อมูลทั่วไปของรายงาน', '', ['หัวข้อ', 'ค่า'], info);
+
+  /* --- 1. สรุป --- */
+  const chData = salesByChannel();
+  let delFee = 0; DELIVERY.forEach(c => { delFee += ((chData[c] && chData[c].rev) || 0) * gpRate(); });
+  const mAgg = menuAgg();
+  let mRev = 0, mCost = 0;
+  Object.keys(mAgg).forEach(k => { mRev += mAgg[k].rev; mCost += mAgg[k].cost; });
+  const sum = [
+    ['ยอดขายรวม (บาท)', Math.round(stats.rev)], ['จำนวนบิล (ไม่นับบิลแยกจ่ายซ้ำ)', stats.bills], ['จำนวนจานที่นับ', stats.qty],
+    ['วันที่มียอดขาย', stats.activeDays], ['ยอดต่อบิลเฉลี่ย (บาท)', expRound(stats.bills ? stats.rev / stats.bills : 0)],
+    ['จานต่อบิลเฉลี่ย', expRound(stats.bills ? stats.qty / stats.bills : 0)],
+    ['ยอดเฉลี่ยต่อวันที่ขาย (บาท)', Math.round(stats.activeDays ? stats.rev / stats.activeDays : 0)],
+    ['ส่วนลดรวม (บาท)', Math.round(posB.reduce((s, b) => s + (b.discount || 0), 0))],
+    ['ค่าคอมเดลิเวอรี (ประมาณ บาท)', Math.round(delFee)],
+    ['ยอดขายเมนูจากออเดอร์ (บาท)', Math.round(mRev)], ['ต้นทุนเมนูจากออเดอร์ (บาท)', Math.round(mCost)],
+    ['บัญชี: ยอดขายสุทธิ (บาท)', Math.round(fin.net)], ['บัญชี: ค่าเช่า', Math.round(fin.rent)], ['บัญชี: ค่าแรง', Math.round(fin.labor)],
+    ['บัญชี: ค่าวัตถุดิบ (ตลาด+ซื้อ)', Math.round(fin.foodCost)], ['บัญชี: ค่าใช้จ่ายรายวันรวม', Math.round(fin.dailyExp)],
+    ['บัญชี: ค่าใช้จ่ายประจำงวด', Math.round(fin.periodicExp)], ['บัญชี: ค่าใช้จ่ายรวมทั้งหมด', Math.round(fin.expenses)],
+    ['บัญชี: กำไรสุทธิ', Math.round(fin.profit)], ['บัญชี: รับเงินสด', Math.round(fin.cash)], ['บัญชี: รับโอน', Math.round(fin.transfer)],
+    ['บัญชี: โครงการคนละครึ่ง/อื่นๆ', Math.round(fin.half)],
+    ['บิลยกเลิก (ใบ)', voids.length], ['บิลยกเลิก (มูลค่า บาท)', Math.round(voids.reduce((s, v) => s + v.subtotal, 0))]
+  ];
+  expSection(out, 'SUMMARY', 'ตัวเลขสรุปรวมทั้งช่วง', '', ['หัวข้อ', 'ค่า'], sum);
+
+  /* --- 2. รายวัน --- */
+  const posDay = {};
+  posB.forEach(b => {
+    const d = String(b.date || (b.closedAt ? isoLocal(b.closedAt) : '')); if (!d) return;
+    const o = posDay[d] = posDay[d] || { rev: 0, bills: 0, qty: 0, disc: 0, guests: 0 };
+    o.rev += b.total; o.qty += b.qty; o.disc += b.discount;
+    if (!b.splitFromTable) { o.bills++; o.guests += b.guests; }
+  });
+  const ordDay = {}; dailySeries().forEach(d => { ordDay[d.date] = d; });
+  const finDay = {}; fin.days.forEach(d => { finDay[d.date] = d; });
+  const vdDay = {}; voids.forEach(v => { const o = vdDay[v.date] = vdDay[v.date] || { n: 0, amt: 0 }; o.n++; o.amt += v.subtotal; });
+  const allDates = Array.from(new Set(dates.concat(Object.keys(posDay), Object.keys(ordDay), Object.keys(finDay), Object.keys(GUESTS.byDate || {})))).sort();
+  const dailyRows = allDates.map(d => {
+    const p = posDay[d] || {}, o = ordDay[d] || {}, f = finDay[d] || {}, g = (GUESTS.byDate || {})[d] || {}, v = vdDay[d] || {};
+    const dow = DOW_TH[new Date(d + 'T12:00:00').getDay()];
+    return [d, dow, Math.round(p.rev || 0), p.bills || 0, p.qty || 0, Math.round(p.disc || 0), p.guests || 0,
+      Math.round(o.rev || 0), o.qty || 0, o.bills || 0, o.snapOnly ? 'ใช่' : '',
+      f.date ? Math.round(f.net) : '', f.date ? Math.round(f.sales) : '', f.date ? Math.round(f.rent) : '', f.date ? Math.round(f.labor) : '',
+      f.date ? Math.round(f.market) : '', f.date ? Math.round(f.purch) : '', f.date ? Math.round(f.exp) : '', f.date ? Math.round(f.profit) : '',
+      f.date ? Math.round(f.cash) : '', f.date ? Math.round(f.transfer) : '', f.date ? Math.round(f.half) : '',
+      g.guests || '', v.n || 0, Math.round(v.amt || 0)];
+  });
+  expSection(out, 'DAILY', 'ตารางรายวัน', 'ว่าง = ไม่มีข้อมูลของแหล่งนั้นในวันนั้น · "ประมาณจากออเดอร์" คือคำนวณจากราคาเมนู ไม่ใช่เงินจริง',
+    ['วันที่', 'วัน', 'ยอดบิลแคชเชียร์', 'จำนวนบิลแคชเชียร์', 'จานแคชเชียร์', 'ส่วนลด', 'ลูกค้า(จากบิล)',
+      'ยอดประมาณจากออเดอร์', 'จานจากออเดอร์', 'บิลประมาณจากออเดอร์', 'เหลือแต่ยอดรวม',
+      'บัญชี:ยอดขายสุทธิ', 'บัญชี:ยอดขายรวม', 'บัญชี:ค่าเช่า', 'บัญชี:ค่าแรง', 'บัญชี:ค่าตลาด', 'บัญชี:ค่าซื้อของ', 'บัญชี:ค่าใช้จ่ายรวม', 'บัญชี:กำไร',
+      'บัญชี:เงินสด', 'บัญชี:โอน', 'บัญชี:คนละครึ่ง', 'ลูกค้า(จากใบนับลูกค้า)', 'บิลยกเลิก(ใบ)', 'บิลยกเลิก(บาท)'], dailyRows);
+
+  /* --- 3. ช่องทาง / ชำระเงิน / ชั่วโมง --- */
+  const chTotal = Object.keys(chData).reduce((s, k) => s + chData[k].rev, 0) || 1;
+  expSection(out, 'CHANNEL', 'ยอดตามช่องทาง', 'เดลิเวอรีไม่ผ่านเครื่องแคชเชียร์ จึงเสริมจากออเดอร์',
+    ['ช่องทาง', 'บิล', 'ยอดขาย', 'จาน', 'สัดส่วนยอด %', 'ค่าคอมประมาณ'],
+    Object.keys(chData).sort((a, b) => chData[b].rev - chData[a].rev).map(k => [k, chData[k].bills, Math.round(chData[k].rev), chData[k].qty,
+      expRound(chData[k].rev / chTotal * 100), DELIVERY.indexOf(k) >= 0 ? Math.round(chData[k].rev * gpRate()) : 0]));
+
+  const pay = {};
+  posB.forEach(b => {
+    if (b.paySplit) Object.keys(b.paySplit).forEach(m => { const a = Number(b.paySplit[m]) || 0; if (a > 0) { const o = pay[m] = pay[m] || { n: 0, amt: 0 }; o.n++; o.amt += a; } });
+    else { const o = pay[b.method] = pay[b.method] || { n: 0, amt: 0 }; o.n++; o.amt += b.total; }
+  });
+  expSection(out, 'PAYMENT', 'ยอดตามวิธีชำระเงิน', 'บิลที่จ่ายหลายวิธีถูกแยกยอดตามวิธี',
+    ['วิธีชำระ', 'จำนวนครั้ง', 'ยอด'], Object.keys(pay).sort((a, b) => pay[b].amt - pay[a].amt).map(m => [m, pay[m].n, Math.round(pay[m].amt)]));
+
+  const hp = {};
+  posB.forEach(b => {
+    const ts = b.openedAt || b.closedAt; if (!ts) return;
+    const h = ts.getHours(); const o = hp[h] = hp[h] || { bills: 0, rev: 0, qty: 0 };
+    if (!b.splitFromTable) o.bills++; o.rev += b.total; o.qty += b.qty;
+  });
+  expSection(out, 'HOUR_POS', 'ยอดบิลแคชเชียร์ตามชั่วโมงที่เปิดบิล', 'ใช้เวลาเปิดบิล (ถ้าไม่มีใช้เวลาปิดบิล)',
+    ['ชั่วโมง', 'บิล', 'ยอดขาย', 'จาน'], Object.keys(hp).map(Number).sort((a, b) => a - b).map(h => [pad2(h) + ':00', hp[h].bills, Math.round(hp[h].rev), hp[h].qty]));
+
+  const heat = {};
+  RAW.forEach(r => { const k = r.ts.getDay() + '_' + r.ts.getHours(); heat[k] = (heat[k] || 0) + r.qty; });
+  expSection(out, 'HEAT_ORDERS', 'จำนวนจานที่ครัวรับ แยกวัน × ชั่วโมง', 'นับเฉพาะรายการที่ลงระบบออเดอร์',
+    ['วัน', 'ชั่วโมง', 'จำนวนจาน'], Object.keys(heat).map(k => { const p = k.split('_'); return [Number(p[0]), Number(p[1]), heat[k]]; })
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(r => [DOW_TH[r[0]], pad2(r[1]) + ':00', r[2]]));
+
+  /* --- 4. เมนู --- */
+  const names = Array.from(new Set(Object.keys(mAgg).concat(MENUS)));
+  const menuRows = names.map(n => {
+    const a = mAgg[n] || { qty: 0, rev: 0, cost: 0 };
+    const price = a.qty ? a.rev / a.qty : priceOf(n), cost = costOf(n);
+    return { n, a, price, cost };
+  }).sort((x, y) => y.a.rev - x.a.rev);
+  const mTot = menuRows.reduce((s, x) => s + x.a.rev, 0) || 1;
+  expSection(out, 'MENU', 'ทุกเมนู', 'ต้นทุน/จาน = 0 แปลว่ายังไม่ได้กรอกต้นทุน · เมนูที่ขายได้ 0 จานก็ยังแสดง',
+    ['เมนู', 'จานที่ขาย', 'ยอดขาย', 'ราคาเฉลี่ย/จาน', 'ต้นทุน/จาน(ตั้งไว้)', 'ต้นทุนรวม', 'กำไรขั้นต้น', 'กำไรต่อจาน', 'กำไร %', 'สัดส่วนยอด %', 'ครัว'],
+    menuRows.map(x => [x.n, x.a.qty, Math.round(x.a.rev), expRound(x.price), x.cost, Math.round(x.a.cost),
+      x.cost > 0 ? Math.round(x.a.rev - x.a.cost) : '', x.cost > 0 ? expRound(x.price - x.cost) : '',
+      (x.cost > 0 && x.price > 0) ? expRound((x.price - x.cost) / x.price * 100) : '', expRound(x.a.rev / mTot * 100),
+      CHEF_NAME[chefOf(x.n)] || chefOf(x.n) || '']));
+
+  /* --- 5. บิลแคชเชียร์ + รายการในบิล --- */
+  expSection(out, 'POS_BILLS', 'บิลแคชเชียร์ทุกใบ', 'แยกจ่าย = บิลย่อยที่แตกจากโต๊ะเดิม (ไม่นับเป็นบิลใหม่ในสถิติจำนวนบิล แต่ยอดเงินนับครบ)',
+    ['วันที่', 'เลขบิล', 'โต๊ะ', 'ช่องทาง', 'บิลแยกจ่าย', 'แยกจากโต๊ะ', 'รวมจ่ายจากโต๊ะ', 'ลูกค้า', 'จาน', 'ยอดรวม', 'ส่วนลด', 'ยอดทานที่ร้าน', 'ยอดกลับบ้าน',
+      'วิธีชำระ', 'แยกวิธีชำระ', 'พนักงาน', 'นาทีที่นั่ง', 'เวลาเปิดบิล', 'เวลาปิดบิล', 'ส่วนของโต๊ะที่รวมจ่าย'],
+    posB.map(b => [b.date, b.billNo, b.table, channelOf(b.splitFromTable || b.table), b.splitFromTable ? 'ใช่' : '', b.splitFromTable, b.mergedFrom,
+      b.guests, b.qty, Math.round(b.total), Math.round(b.discount), Math.round(b.dineTotal), Math.round(b.awayTotal),
+      b.method, b.paySplit ? JSON.stringify(b.paySplit) : '', b.staff, b.minutes, fmtDT(b.openedAt), fmtDT(b.closedAt),
+      b.segments && b.segments.length ? JSON.stringify(b.segments) : '']));
+
+  const itemList = [];
+  posB.forEach(b => b.items.forEach(x => {
+    if (!x) return;
+    const o = Object.assign({ วันที่: b.date, เลขบิล: b.billNo, โต๊ะ: b.table }, x);
+    if (o.qty != null && o.price != null) o['รวมเงิน(qty×price)'] = (Number(o.qty) || 0) * (Number(o.price) || 0);
+    itemList.push(o);
+  }));
+  const it = expObjs(itemList, ['วันที่', 'เลขบิล', 'โต๊ะ']);
+  expSection(out, 'POS_BILL_ITEMS', 'รายการอาหารในทุกบิลแคชเชียร์', 'ชื่อคอลัมน์ name/qty/price มาจากข้อมูลบิลโดยตรง', it.head, it.rows);
+
+  /* --- 6. ออเดอร์ครัว --- */
+  expSection(out, 'ORDER_LINES', 'ออเดอร์ที่ครัวรับทุกบรรทัด', 'นาทีทำอาหาร = เวลาที่ครัวกดเสร็จ − เวลาที่สั่ง (ว่าง = ไม่มีข้อมูลหรือเกิน 240 นาที)',
+    ['เวลาสั่ง', 'วันที่', 'วัน', 'ชั่วโมง', 'โต๊ะ', 'ช่องทาง', 'พนักงาน', 'เมนู', 'จำนวน', 'ราคา/จาน', 'ต้นทุน/จาน', 'ยอดบรรทัด', 'หมายเหตุลูกค้า', 'นาทีทำอาหาร', 'ครัว'],
+    RAW.map(r => [fmtDT(r.ts), isoLocal(r.ts), DOW_TH[r.ts.getDay()], r.ts.getHours(), r.table, channelOf(r.table), r.staff, r.item, r.qty,
+      priceOf(r.item), costOf(r.item), Math.round(priceOf(r.item) * r.qty), r.comment, r.prep == null ? '' : expRound(r.prep),
+      CHEF_NAME[chefOf(r.item)] || chefOf(r.item) || '']));
+
+  expSection(out, 'ORDER_BILLS_EST', 'บิลที่ประมาณจากออเดอร์', 'จัดกลุ่มออเดอร์โต๊ะเดียวกันที่ห่างกันไม่เกิน 90 นาทีเป็น 1 บิล · ยอดเป็นค่าประมาณจากราคาเมนู',
+    ['เริ่ม', 'สิ้นสุด', 'โต๊ะ', 'ช่องทาง', 'พนักงาน', 'จาน', 'ยอดประมาณ', 'ต้นทุน', 'รายการ'],
+    BILLS.map(b => [fmtDT(b.start), fmtDT(b.end), b.table, b.channel, b.staff, b.qty, Math.round(b.rev), Math.round(b.cost), b.items.join(' | ')]));
+
+  /* --- 7. บัญชี --- */
+  const fl = Object.keys(FIN.daily || {}).sort().map(d => Object.assign({ date: d }, FIN.daily[d]));
+  const fo = expObjs(fl, ['date']);
+  expSection(out, 'FIN_DAILY', 'บัญชีรายวัน (ทุกฟิลด์ตามที่บันทึก)', FIN.error ? 'ดึงบัญชีไม่สำเร็จ: ' + FIN.error : '', fo.head, fo.rows);
+  expSection(out, 'FIN_PERIODIC', 'ค่าใช้จ่ายประจำงวด', '', ['วันที่', 'หมวด', 'จำนวนเงิน', 'หมายเหตุ'],
+    (FIN.periodic || []).slice().sort((a, b) => a.date.localeCompare(b.date)).map(p => [p.date, p.category, Math.round(p.amount), p.note]));
+  expSection(out, 'FIN_BENCH', 'เกณฑ์เปรียบเทียบสัดส่วนค่าใช้จ่าย (ที่ร้านตั้งไว้ หรือค่ามาตรฐานของระบบ)', 'ค่าต่ำ/สูง เป็น % ของยอดขาย',
+    ['หมวด', 'ต่ำสุด %', 'สูงสุด %'], Object.keys(FIN_DEF_BENCH).map(k => { const b = bench(k); return [k, b.lo, b.hi]; }));
+
+  /* --- 8. ลูกค้า --- */
+  const ps = posGuestStats();
+  const gd = Array.from(new Set(Object.keys(GUESTS.byDate || {}).concat(Object.keys(ps.byDate || {})))).sort();
+  expSection(out, 'GUESTS', 'ลูกค้ารายวัน', 'จากบิลแคชเชียร์ (ถ้ามี) และจากใบนับลูกค้าในระบบออเดอร์',
+    ['วันที่', 'ลูกค้า(บิลแคชเชียร์)', 'รอบโต๊ะทั้งหมด', 'รอบที่กรอกจำนวนคน', 'ยอดทานที่ร้าน', 'ลูกค้า(ใบนับลูกค้า)', 'จำนวนรอบ(ใบนับลูกค้า)'],
+    gd.map(d => { const a = (ps.byDate || {})[d] || {}, g = (GUESTS.byDate || {})[d] || {}; return [d, a.guests || '', a.rounds || '', a.filledRounds || '', Math.round(a.rev || 0) || '', g.guests || '', g.tables || '']; }));
+
+  /* --- 9. บิลยกเลิก / เดินตลาด --- */
+  expSection(out, 'VOIDS', 'บิลที่ยกเลิก', voidsErr ? 'โหลดไม่สำเร็จ: ' + voidsErr : '',
+    ['วันที่', 'โต๊ะ', 'ลูกค้า', 'เวลาเปิด', 'เวลายกเลิก', 'นาที', 'จาน', 'มูลค่า', 'พนักงานที่ยกเลิก', 'เหตุผล', 'รายการ'],
+    voids.sort((a, b) => String(a.voidedAt || a.date).localeCompare(String(b.voidedAt || b.date)))
+      .map(v => [v.date, v.table, v.guests, v.openedAt, v.voidedAt, v.minutes, v.qty, Math.round(v.subtotal), v.staff, v.reason, v.items]));
+  const mk = expObjs(mkRows.map(r => ({ วันที่: r.date, วัน: DOW_TH[r.dow] != null ? DOW_TH[r.dow] : r.dow, สินค้า: r.name, หน่วย: r.unit, ซื้อ: r.qty, คงเหลือ: r.remain,
+    ค่ามาตรฐานที่ใช้: r.parUsed, ร้าน: r.shopName, ผู้ซื้อ: r.empName, ข้าม: r.skipped ? 'ใช่' : '', ข้อมูลรอบเก่า: r.legacy ? 'ใช่' : '' })), []);
+  expSection(out, 'MARKET', 'วัตถุดิบที่ซื้อจากตลาด', 'ตามช่วงวันที่เลือก · ระบบนี้ไม่เก็บราคาต่อหน่วย', mk.head, mk.rows);
+
+  /* --- 10. เป้า --- */
+  const tg = Object.keys(RC.targets || {}).sort().map(k => [k, Number(RC.targets[k]) || 0]);
+  tg.push(['ค่าเป้าเริ่มต้น (เมื่อเดือนนั้นไม่ได้ตั้ง)', Number(RC.defaultTarget) || 0]);
+  const cd = []; for (let i = 0; i < 7; i++) if (RC.closedDows && RC.closedDows[i]) cd.push(DOW_TH[i]);
+  tg.push(['วันหยุดประจำสัปดาห์', cd.join(' ') || 'ไม่มี']);
+  expSection(out, 'GOAL_TARGETS', 'เป้ายอดขาย', 'ไม่ขึ้นกับช่วงวันที่เลือก', ['เดือน/รายการ', 'ค่า'], tg);
+  expSection(out, 'GOAL_DAYS', 'ยอดรายวันที่ใช้คำนวณเป้า', 'ไม่ขึ้นกับช่วงวันที่เลือก · แหล่งข้อมูล: ' + (GD.source === 'pos' ? 'บิลแคชเชียร์' : GD.source === 'acc' ? 'บัญชี' : '-'),
+    ['วันที่', 'ยอด', 'บิล', 'ลูกค้า'], Object.keys(GD.days || {}).sort().map(d => [d, Math.round(GD.days[d].rev), GD.days[d].bills, GD.days[d].guests]));
+
+  /* --- 11. ข้อความบนหน้าจอ --- */
+  const sc = expScreenRows();
+  expSection(out, 'SCREEN', 'สิ่งที่แสดงบนหน้าจอของแต่ละแท็บ (รวมข้อวิเคราะห์อัตโนมัติและคำแนะนำของระบบ)',
+    'คอลัมน์: แท็บ, ชนิด, แล้วเป็นหัวข้อหรือเนื้อหา/เซลล์ของตาราง ตามลำดับ', ['แท็บ', 'ชนิด', 'เนื้อหา...'], sc);
+
+  return out.join('\r\n');
+}
+
+async function downloadCsv() {
+  const btn = document.getElementById('csvBtn');
+  if (!RANGE.from) return;
+  if (!document.getElementById('loader').classList.contains('hidden')) { alert('ข้อมูลยังโหลดไม่เสร็จ รอสักครู่แล้วกดใหม่'); return; }
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'กำลังรวบรวมข้อมูล…';
+  try {
+    const csv = await buildFullExport();
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'report_full_' + isoLocal(RANGE.from) + '_' + isoLocal(RANGE.to) + '.csv';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } catch (e) {
+    console.error(e);
+    alert('ส่งออกไม่สำเร็จ: ' + (e && e.message ? e.message : e));
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
 }
 
 /* ============ demo data ============ */
@@ -2636,7 +2959,11 @@ document.getElementById('csvBtn').addEventListener('click', downloadCsv);
 document.getElementById('saveCostBtn').addEventListener('click', saveCosts);
 document.getElementById('costSearch').addEventListener('input', e => drawCostTable(e.target.value));
 
-loadAll();
+/* [FIX] เดิมเรียก loadAll() ตรงนี้ ก่อนที่ตัวแปร let ท้ายไฟล์ (เช่น VD_LOADED) จะถูกประกาศ
+   → ReferenceError (TDZ) ทำให้ค้างที่ "กำลังโหลด…" จนกว่าจะกดปุ่มเอง
+   ตอนนี้รอให้สคริปต์ทั้งหน้าโหลดครบก่อนค่อยเริ่มโหลดข้อมูล */
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAll);
+else setTimeout(loadAll, 0);
 
 
 /* ═════════ [MARKET] วัตถุดิบ จากระบบเดินตลาด ═════════
